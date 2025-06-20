@@ -1,0 +1,77 @@
+/* style.css */
+
+/* Reset básico e fonte */
+body {
+  font-family: Arial, sans-serif;
+  margin: 20px;
+}
+
+/* Esconder elementos */
+.hidden {
+  display: none;
+}
+
+/* Botões */
+.btn {
+  margin: 5px 0;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+/* Inputs e selects */
+input[type="text"], select {
+  padding: 6px;
+  width: 200px;
+  margin-bottom: 10px;
+}
+
+/* Container de jogadores */
+.players-container {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+/* Times */
+.team {
+  flex: 1;
+  margin-right: 10px;
+}
+.team:last-child {
+  margin-right: 0;
+}
+
+/* Listas de jogos finalizados */
+#finishedGamesSetupList div,
+#finishedGamesList div {
+  margin-bottom: 4px;
+}
+
+/* Placar visual */
+#scoreboard {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 40px;
+  margin-bottom: 15px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+#scoreboard div {
+  font-weight: bold;
+  user-select: none;
+}
+#teamA-score {
+  font-size: 2.5rem;
+  color: #0057e7;
+  min-width: 80px;
+  text-align: center;
+}
+#teamB-score {
+  font-size: 2.5rem;
+  color: #d62d20;
+  min-width: 80px;
+  text-align: center;
+}
+#scoreboard .vs {
+  font-size: 1.8rem;
+}
