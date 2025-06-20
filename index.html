@@ -5,210 +5,35 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Placar de Vôlei com Configuração Inicial</title>
   <style>
-   /* Reset básico e fonte */
-* {
-  box-sizing: border-box;
-}
-
-body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: #f4f6f8;
-  color: #222;
-  margin: 20px;
-  padding: 0;
-}
-
-/* Container principal */
-#gameContainer {
-  background: white;
-  border-radius: 10px;
-  max-width: 700px;
-  margin: auto;
-  padding: 20px 30px 30px 30px;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-}
-
-/* Cabeçalho */
-h1, h2, h3, h4 {
-  margin: 0 0 10px 0;
-  font-weight: 700;
-  color: #2c3e50;
-}
-
-h1 {
-  font-size: 2rem;
-  text-align: center;
-  margin-bottom: 30px;
-}
-
-h2 {
-  font-size: 1.5rem;
-  margin-bottom: 20px;
-}
-
-/* Setup e form */
-#setupContainer input[type="text"],
-#setupContainer select {
-  width: 100%;
-  padding: 10px 12px;
-  font-size: 1rem;
-  border-radius: 6px;
-  border: 1px solid #bbb;
-  margin-bottom: 15px;
-  transition: border-color 0.3s;
-}
-
-#setupContainer input[type="text"]:focus,
-#setupContainer select:focus {
-  outline: none;
-  border-color: #3498db;
-  box-shadow: 0 0 6px #a8d0fb;
-}
-
-/* Botões */
-.btn {
-  background-color: #3498db;
-  border: none;
-  color: white;
-  padding: 12px 18px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: 600;
-  font-size: 1rem;
-  margin: 6px 8px 12px 0;
-  transition: background-color 0.25s ease;
-  user-select: none;
-  box-shadow: 0 3px 6px rgba(52,152,219,0.4);
-}
-
-.btn:hover {
-  background-color: #2980b9;
-  box-shadow: 0 5px 12px rgba(41,128,185,0.6);
-}
-
-.btn:active {
-  background-color: #1c5980;
-  box-shadow: none;
-}
-
-/* Container dos jogadores */
-.players-container {
-  display: flex;
-  justify-content: space-between;
-  gap: 20px;
-  margin-bottom: 25px;
-}
-
-/* Time e jogadores */
-.team {
-  flex: 1;
-  background: #ecf0f1;
-  padding: 15px 20px;
-  border-radius: 8px;
-  box-shadow: inset 0 0 8px rgba(0,0,0,0.05);
-  min-width: 140px;
-}
-
-.team h4 {
-  margin-bottom: 12px;
-  color: #34495e;
-  border-bottom: 2px solid #3498db;
-  padding-bottom: 5px;
-  font-size: 1.1rem;
-  user-select: none;
-}
-
-.team p {
-  font-size: 1.1rem;
-  margin: 6px 0;
-  padding-left: 10px;
-  position: relative;
-  user-select: none;
-}
-
-.team p.serve {
-  font-weight: 700;
-  color: #27ae60;
-}
-
-.team p.serve::after {
-  content: "🎾";
-  position: absolute;
-  right: 10px;
-  font-size: 1.2rem;
-  top: 0;
-  user-select: none;
-}
-
-/* Placar principal */
-#summary {
-  background: #fafafa;
-  border: 2px solid #3498db;
-  border-radius: 8px;
-  padding: 20px 25px;
-  font-family: monospace, monospace;
-  font-size: 1.15rem;
-  line-height: 1.4;
-  white-space: pre-wrap;
-  margin-bottom: 25px;
-  color: #2c3e50;
-  user-select: none;
-}
-
-/* Seletor da fase */
-#tournamentPhase {
-  margin-bottom: 20px;
-  padding: 8px 10px;
-  border-radius: 6px;
-  border: 1px solid #bbb;
-  font-size: 1rem;
-}
-
-/* Visibilidade */
-.hidden {
-  display: none;
-}
-
-/* Container de jogos finalizados */
-#finishedGamesList {
-  font-size: 1rem;
-  color: #555;
-  max-height: 200px;
-  overflow-y: auto;
-  padding-right: 10px;
-}
-
-/* Scrollbar customizada */
-#finishedGamesList::-webkit-scrollbar {
-  width: 8px;
-}
-
-#finishedGamesList::-webkit-scrollbar-thumb {
-  background-color: #3498db;
-  border-radius: 8px;
-}
-
-#finishedGamesList div {
-  padding: 6px 0;
-  border-bottom: 1px solid #ddd;
-  user-select: none;
-}
-
-/* Layout responsivo */
-@media (max-width: 520px) {
-  .players-container {
-    flex-direction: column;
-  }
-  .team {
-    width: 100%;
-    margin-bottom: 15px;
-  }
-  .btn {
-    width: 100%;
-    margin: 8px 0;
-  }
-}
-
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    .hidden {
+      display: none;
+    }
+    .btn {
+      margin: 5px 0;
+      padding: 8px 12px;
+      cursor: pointer;
+    }
+    input[type="text"], select {
+      padding: 6px;
+      width: 200px;
+      margin-bottom: 10px;
+    }
+    .players-container {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    .team {
+      flex: 1;
+      margin-right: 10px;
+    }
+    .team:last-child {
+      margin-right: 0;
+    }
   </style>
 </head>
 <body>
@@ -289,6 +114,19 @@ h2 {
         <button class="btn" onclick="finishSet()">Finalizar Set</button>
         <button class="btn" onclick="finishGame()">Finalizar Jogo</button>
       </div>
+      <div style="margin-top: 10px;">
+        <label>Mudar sacador manualmente:</label><br />
+        <select id="manualServerTeam" onchange="manualServerChange()">
+          <option value="" disabled selected>Selecione a dupla</option>
+          <option value="A">Dupla 1</option>
+          <option value="B">Dupla 2</option>
+        </select>
+        <select id="manualServerIndex" onchange="manualServerChange()">
+          <option value="" disabled selected>Selecione o índice</option>
+          <option value="0">0</option>
+          <option value="1">1</option>
+        </select>
+      </div>
     </div>
 
     <pre id="summary"></pre>
@@ -299,7 +137,6 @@ h2 {
   </div>
 
 <script>
-  // Variáveis de estado
   let teamAName = "";
   let teamBName = "";
   let teamA = [];
@@ -315,10 +152,9 @@ h2 {
   let lastServerIndexB = 0;
   let historyStack = [];
   let finishedGames = [];
+  let setFinished = false; // flag para evitar finalização repetida
 
-  // Setup e início do jogo
   document.getElementById("startGameBtn").addEventListener("click", () => {
-    // Ler entradas
     const aName = document.getElementById("teamAName").value.trim();
     const aPlayers = document.getElementById("teamAPlayers").value.trim();
     const bName = document.getElementById("teamBName").value.trim();
@@ -327,7 +163,6 @@ h2 {
     const initialServerTeam = document.getElementById("initialServerTeam").value;
     const initialServerIndex = parseInt(document.getElementById("initialServerIndex").value, 10);
 
-    // Validações básicas
     if (!aName || !aPlayers || !bName || !bPlayers || !phase || !initialServerTeam || isNaN(initialServerIndex)) {
       alert("Preencha todos os campos corretamente antes de iniciar o jogo.");
       return;
@@ -346,7 +181,6 @@ h2 {
       return;
     }
 
-    // Atualizar estado
     teamAName = aName;
     teamBName = bName;
     teamA = aPlayersArr;
@@ -361,24 +195,25 @@ h2 {
     sets = [];
     lastScoringTeam = null;
     historyStack = [];
+    setFinished = false;
 
-    // Ocultar setup e mostrar jogo
     document.getElementById("setupContainer").classList.add("hidden");
     document.getElementById("gameContainer").classList.remove("hidden");
 
-    // Atualizar interface
     document.getElementById("tournamentPhase").value = tournamentPhase;
     document.getElementById("set-info").textContent = `Set ${currentSet}`;
     renderPlayers();
-    renderPlayerInputs();
     updateScores();
     renderSummary();
     renderFinishedGames();
 
-    // Mostrar nomes das duplas nos botões
     document.getElementById("btnTeamAName").textContent = teamAName;
     document.getElementById("btnTeamBName").textContent = teamBName;
     document.getElementById("displayTeams").textContent = `${teamAName} vs ${teamBName}`;
+
+    // Reset seleção manual do sacador
+    document.getElementById("manualServerTeam").value = "";
+    document.getElementById("manualServerIndex").value = "";
   });
 
   function renderPlayers() {
@@ -397,7 +232,7 @@ h2 {
         p.textContent = `${player} (P${idx})`;
         if (server.team === teamLabel && server.index === idx) {
           p.style.fontWeight = "bold";
-          p.textContent += " 🎾"; // Indica sacador
+          p.textContent += " 🎾"; 
         }
         div.appendChild(p);
       });
@@ -408,14 +243,12 @@ h2 {
     container.appendChild(createTeamDiv(teamBName, teamB, "B"));
   }
 
-  // Render inputs para trocar sacador (se quiser)
-  function renderPlayerInputs() {
-    // Aqui você pode implementar se quiser permitir troca manual do sacador
-  }
-
-  // Adicionar ponto para um time
   function addPoint(team) {
-    // Salvar estado atual no histórico para desfazer
+    if (setFinished) {
+      alert("O set já foi finalizado. Finalize o jogo ou inicie um novo set.");
+      return;
+    }
+
     historyStack.push({
       scoreA, scoreB, server: {...server}, lastScoringTeam, currentSet,
       sets: JSON.parse(JSON.stringify(sets)),
@@ -428,151 +261,152 @@ h2 {
 
     lastScoringTeam = team;
 
-    // Alternar sacador
     updateServer(team);
 
     updateScores();
     renderPlayers();
     renderSummary();
 
-    // Verifica se algum time venceu o set automaticamente
     if (checkSetWinner()) {
-      finishSet();
+      setFinished = true;
+      alert(`Set ${currentSet} finalizado!`);
     }
   }
 
-  // Atualizar o sacador após ponto
   function updateServer(scoringTeam) {
-    // O sacador muda para o time que fez o ponto
     if (scoringTeam === "A") {
-      // Alternar entre os dois jogadores da dupla A
       lastServerIndexA = (lastServerIndexA + 1) % 2;
       server = {team: "A", index: lastServerIndexA};
     } else {
       lastServerIndexB = (lastServerIndexB + 1) % 2;
       server = {team: "B", index: lastServerIndexB};
     }
+
+    // Atualiza seleção manual do sacador para refletir o servidor atual
+    document.getElementById("manualServerTeam").value = server.team;
+    document.getElementById("manualServerIndex").value = server.index.toString();
   }
 
-  // Verifica condição de vitória no set (21 pontos + vantagem 2)
+  function manualServerChange() {
+    const team = document.getElementById("manualServerTeam").value;
+    const index = parseInt(document.getElementById("manualServerIndex").value, 10);
+    if ((team === "A" || team === "B") && (index === 0 || index === 1)) {
+      server = {team, index};
+      renderPlayers();
+      renderSummary();
+    }
+  }
+
+  function updateScores() {
+    // Apenas atualizar placar e título do set
+    document.getElementById("btnTeamAName").textContent = teamAName;
+    document.getElementById("btnTeamBName").textContent = teamBName;
+    document.getElementById("set-info").textContent = `Set ${currentSet}`;
+  }
+
   function checkSetWinner() {
-    if ((scoreA >= 21 || scoreB >= 21) && Math.abs(scoreA - scoreB) >= 2) {
+    const diff = Math.abs(scoreA - scoreB);
+    if ((scoreA >= 25 || scoreB >= 25) && diff >= 2) {
       return true;
     }
     return false;
   }
 
-  // Atualiza placar e botões
-  function updateScores() {
-    // Atualiza o título do set
-    document.getElementById("set-info").textContent = `Set ${currentSet}`;
-  }
-
-  // Finaliza o set atual, registra e prepara próximo
   function finishSet() {
-    if (!checkSetWinner()) {
-      alert("Não é possível finalizar o set: nenhum time alcançou a pontuação necessária com vantagem de 2 pontos.");
+    if (setFinished) {
+      alert("Este set já foi finalizado.");
       return;
     }
 
-    // Registra o set finalizado
-    sets.push({set: currentSet, scoreA, scoreB});
-
-    // Limpa estado para o próximo set
-    scoreA = 0;
-    scoreB = 0;
-    currentSet++;
-
-    // Mantém o sacador no time que ganhou o último ponto
-    if (lastScoringTeam === "A") {
-      lastServerIndexB = 0; // reset índice sacador do outro time
-      // servidor já está atualizado no addPoint
-    } else if (lastScoringTeam === "B") {
-      lastServerIndexA = 0;
+    if (!checkSetWinner()) {
+      alert("O set não pode ser finalizado antes de um time alcançar 25 pontos com vantagem mínima de 2.");
+      return;
     }
 
-    // Salva estado atual no histórico
-    historyStack.push({
-      scoreA, scoreB, server: {...server}, lastScoringTeam, currentSet,
-      sets: JSON.parse(JSON.stringify(sets)),
-      lastServerIndexA, lastServerIndexB
+    // Salva o set atual
+    sets.push({
+      setNumber: currentSet,
+      scoreA,
+      scoreB,
+      server: {...server}
     });
 
-    updateScores();
-    renderPlayers();
-    renderSummary();
-  }
+    setFinished = true;
 
-  // Finaliza o jogo, salva no localStorage e reinicia
-  function finishGame() {
-    if (sets.length === 0) {
-      alert("Nenhum set foi finalizado.");
-      return;
+    // Prepara próximo set
+    currentSet++;
+    scoreA = 0;
+    scoreB = 0;
+    lastScoringTeam = null;
+    historyStack = [];
+
+    // O sacador do próximo set é o time que venceu o set, mantendo o índice do sacador do time vencedor
+    if (sets[sets.length - 1].scoreA > sets[sets.length - 1].scoreB) {
+      server = {team: "A", index: lastServerIndexA};
+    } else {
+      server = {team: "B", index: lastServerIndexB};
     }
 
-    // Salvar o jogo com detalhes
-    const gameData = {
+    document.getElementById("set-info").textContent = `Set ${currentSet}`;
+
+    renderPlayers();
+    renderSummary();
+
+    alert(`Set ${currentSet - 1} finalizado. Comece o próximo set.`);
+  }
+
+  function finishGame() {
+    if (!setFinished) {
+      alert("Finalize o set atual antes de finalizar o jogo.");
+      return;
+    }
+    // Confirmação opcional
+    if (!confirm("Deseja realmente finalizar o jogo?")) return;
+
+    // Determinar vencedor geral por sets ganhos
+    let winsA = 0;
+    let winsB = 0;
+    sets.forEach(s => {
+      if (s.scoreA > s.scoreB) winsA++;
+      else if (s.scoreB > s.scoreA) winsB++;
+    });
+
+    let winner = "";
+    if (winsA > winsB) winner = teamAName;
+    else if (winsB > winsA) winner = teamBName;
+    else winner = "Empate";
+
+    // Salvar o jogo finalizado
+    finishedGames.push({
       teamAName,
       teamBName,
-      teamAPlayers: [...teamA],
-      teamBPlayers: [...teamB],
       tournamentPhase,
       sets: JSON.parse(JSON.stringify(sets)),
-      date: new Date().toLocaleString()
-    };
-
-    finishedGames.push(gameData);
+      date: new Date().toLocaleString(),
+      winner
+    });
     localStorage.setItem("finishedGames", JSON.stringify(finishedGames));
 
-    alert("Jogo finalizado e salvo com sucesso!");
+    // Mostrar mensagem e resetar para setup
+    alert(`Jogo finalizado. Vencedor: ${winner}`);
 
-    // Resetar tudo e voltar para o setup
-    resetGame();
+    resetToSetup();
+    renderFinishedGames();
   }
 
-  // Desfazer última ação
-  function undo() {
-    if (historyStack.length === 0) {
-      alert("Nada para desfazer.");
-      return;
-    }
-    const lastState = historyStack.pop();
-    scoreA = lastState.scoreA;
-    scoreB = lastState.scoreB;
-    server = lastState.server;
-    lastScoringTeam = lastState.lastScoringTeam;
-    currentSet = lastState.currentSet;
-    sets = JSON.parse(JSON.stringify(lastState.sets));
-    lastServerIndexA = lastState.lastServerIndexA;
-    lastServerIndexB = lastState.lastServerIndexB;
+  function resetToSetup() {
+    document.getElementById("setupContainer").classList.remove("hidden");
+    document.getElementById("gameContainer").classList.add("hidden");
 
-    updateScores();
-    renderPlayers();
-    renderSummary();
-  }
+    // Limpar inputs
+    document.getElementById("teamAName").value = "";
+    document.getElementById("teamAPlayers").value = "";
+    document.getElementById("teamBName").value = "";
+    document.getElementById("teamBPlayers").value = "";
+    document.getElementById("tournamentPhaseSelect").value = "";
+    document.getElementById("initialServerTeam").value = "";
+    document.getElementById("initialServerIndex").value = "";
 
-  // Renderiza resumo dos sets atuais
-  function renderSummary() {
-    let text = `Placar Atual (Set ${currentSet}):\n`;
-    text += `${teamAName}: ${scoreA} pontos\n`;
-    text += `${teamBName}: ${scoreB} pontos\n\n`;
-    text += `Sets concluídos:\n`;
-    if (sets.length === 0) text += "Nenhum set finalizado.\n";
-    else {
-      sets.forEach(s => {
-        text += `Set ${s.set}: ${teamAName} ${s.scoreA} x ${s.scoreB} ${teamBName}\n`;
-      });
-    }
-    document.getElementById("summary").textContent = text;
-  }
-
-  // Muda fase do torneio durante o jogo
-  function changePhase() {
-    tournamentPhase = document.getElementById("tournamentPhase").value;
-  }
-
-  // Reseta o jogo para setup
-  function resetGame() {
     teamAName = "";
     teamBName = "";
     teamA = [];
@@ -587,42 +421,106 @@ h2 {
     lastServerIndexA = 0;
     lastServerIndexB = 0;
     historyStack = [];
-
-    document.getElementById("setupContainer").classList.remove("hidden");
-    document.getElementById("gameContainer").classList.add("hidden");
-    document.getElementById("teamAName").value = "";
-    document.getElementById("teamAPlayers").value = "";
-    document.getElementById("teamBName").value = "";
-    document.getElementById("teamBPlayers").value = "";
-    document.getElementById("tournamentPhaseSelect").value = "";
-    document.getElementById("initialServerTeam").value = "";
-    document.getElementById("initialServerIndex").value = "";
-    document.getElementById("summary").textContent = "";
-    document.getElementById("finishedGamesList").innerHTML = "<i>Nenhum jogo finalizado salvo.</i>";
+    setFinished = false;
   }
 
-  // Carregar jogos finalizados do localStorage
+  function undo() {
+    if (historyStack.length === 0) {
+      alert("Nada para desfazer.");
+      return;
+    }
+    const lastState = historyStack.pop();
+
+    scoreA = lastState.scoreA;
+    scoreB = lastState.scoreB;
+    server = lastState.server;
+    lastScoringTeam = lastState.lastScoringTeam;
+    currentSet = lastState.currentSet;
+    sets = lastState.sets;
+    lastServerIndexA = lastState.lastServerIndexA;
+    lastServerIndexB = lastState.lastServerIndexB;
+    setFinished = false;
+
+    renderPlayers();
+    updateScores();
+    renderSummary();
+  }
+
+  function renderSummary() {
+    const summaryEl = document.getElementById("summary");
+    let text = `Sets jogados: ${sets.length}\n`;
+    sets.forEach(s => {
+      text += `Set ${s.setNumber}: ${s.scoreA} x ${s.scoreB} (Sacador: Dupla ${s.server.team} - Jogador ${s.server.index})\n`;
+    });
+    text += `Set atual (${currentSet}): ${scoreA} x ${scoreB}\n`;
+    text += `Sacador atual: Dupla ${server ? server.team : "?"} - Jogador ${server ? server.index : "?"}\n`;
+    summaryEl.textContent = text;
+  }
+
+  function changePhase() {
+    tournamentPhase = document.getElementById("tournamentPhase").value;
+  }
+
+  // Lista de jogos finalizados na tela de jogo
   function renderFinishedGames() {
     const saved = localStorage.getItem("finishedGames");
     if (saved) {
       finishedGames = JSON.parse(saved);
       if (finishedGames.length > 0) {
-        const div = document.getElementById("finishedGamesList");
-        div.innerHTML = "";
-        finishedGames.forEach((game, idx) => {
-          const d = document.createElement("div");
-          d.textContent = `${idx + 1}. ${game.teamAName} vs ${game.teamBName} - ${game.tournamentPhase} - ${game.date}`;
-          div.appendChild(d);
-        });
+        // Atualiza lista no setup
+        const divSetup = document.getElementById("finishedGamesListSetupContent");
+        if(divSetup){
+          divSetup.innerHTML = "";
+          finishedGames.forEach((game, idx) => {
+            const d = document.createElement("div");
+            d.textContent = `${idx + 1}. ${game.teamAName} vs ${game.teamBName} - ${game.tournamentPhase} - ${game.date}`;
+            divSetup.appendChild(d);
+          });
+        }
+
+        // Atualiza lista dentro do jogo
+        const divGame = document.getElementById("finishedGamesList");
+        if(divGame) {
+          divGame.innerHTML = "";
+          finishedGames.forEach((game, idx) => {
+            const d = document.createElement("div");
+            d.textContent = `${idx + 1}. ${game.teamAName} vs ${game.teamBName} - ${game.tournamentPhase} - ${game.date}`;
+            divGame.appendChild(d);
+          });
+        }
         return;
       }
     }
-    document.getElementById("finishedGamesList").innerHTML = "<i>Nenhum jogo finalizado salvo.</i>";
+    if(document.getElementById("finishedGamesListSetupContent")){
+      document.getElementById("finishedGamesListSetupContent").innerHTML = "<i>Nenhum jogo finalizado salvo.</i>";
+    }
+    if(document.getElementById("finishedGamesList")){
+      document.getElementById("finishedGamesList").innerHTML = "<i>Nenhum jogo finalizado salvo.</i>";
+    }
   }
 
-  // Inicializa lista de jogos finalizados ao carregar a página
+  // Renderiza a lista de jogos finalizados já na tela inicial (setup)
+  // Adicione este bloco no HTML, dentro de setupContainer, antes do botão iniciar:
+  // <div id="finishedGamesListSetup">
+  //   <h3>Jogos Finalizados</h3>
+  //   <div id="finishedGamesListSetupContent"><i>Nenhum jogo finalizado salvo.</i></div>
+  // </div>
+
   renderFinishedGames();
+
 </script>
+
+<style>
+  /* Estilos para lista de jogos finalizados no setup */
+  #finishedGamesListSetup div {
+    max-height: 150px;
+    overflow-y: auto;
+    border: 1px solid #ccc;
+    padding: 8px;
+    background-color: #f9f9f9;
+    margin-bottom: 15px;
+  }
+</style>
 
 </body>
 </html>
