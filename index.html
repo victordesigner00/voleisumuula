@@ -442,18 +442,21 @@ h2 {
     }
   }
 
-  // Atualizar o sacador após ponto
   function updateServer(scoringTeam) {
-    // O sacador muda para o time que fez o ponto
+  if (server.team === scoringTeam) {
+    // Time que sacava fez ponto: mantém sacador
+    return;
+  } else {
+    // Time que recebia fez ponto: agora é ele quem saca, alterna o sacador
     if (scoringTeam === "A") {
-      // Alternar entre os dois jogadores da dupla A
       lastServerIndexA = (lastServerIndexA + 1) % 2;
-      server = {team: "A", index: lastServerIndexA};
+      server = { team: "A", index: lastServerIndexA };
     } else {
       lastServerIndexB = (lastServerIndexB + 1) % 2;
-      server = {team: "B", index: lastServerIndexB};
+      server = { team: "B", index: lastServerIndexB };
     }
   }
+}
 
   // Verifica condição de vitória no set (21 pontos + vantagem 2)
   function checkSetWinner() {
