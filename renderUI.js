@@ -1,94 +1,80 @@
-// renderUI.js
+// Atualiza visual do placar e informações do set
+function updateScoreboard() {
+  document.getElementById("teamA-score").textContent = scoreA;
+  document.getElementById("teamB-score").textContent = scoreB;
+  document.getElementById("set-info").textContent = currentSet;
+}
 
-import { gameState } from './gameState.js';
+// Renderiza os nomes dos jogadores e o sacador
+function renderPlayers() {
+  const container = document.getElementById("playersContainer");
+  container.innerHTML = "";
 
-export const renderUI = (() => {
-  function renderPlayers() {
-    const state = gameState.getState();
-    const container = document.getElementById("playersContainer");
-    container.innerHTML = "";
-
-    function createTeamDiv(name, players, teamLabel) {
-      const div = document.createElement("div");
-      div.className = "team";
-      const title = document.createElement("h4");
-      title.textContent = name;
-      div.appendChild(title);
-
-      players.forEach((p, i) => {
-        const pElem = document.createElement("p");
-        pElem.textContent = `${p} (P${i})`;
-        if (state.server && state.server.team === teamLabel && state.server.index === i) {
-          pElem.style.fontWeight = "bold";
-          pElem.textContent += " 🎾";
-        }
-        div.appendChild(pElem);
-      });
-
-      return div;
+  const teamAdiv = document.createElement("div");
+  teamAdiv.classList.add("team");
+  teamAdiv.innerHTML = `<h3>${teamAName}</h3>`;
+  teamA.forEach((player, idx) => {
+    const playerDiv = document.createElement("div");
+    playerDiv.textContent = player;
+    if (server && server.team === "A" && server.index === idx) {
+      playerDiv.style.fontWeight = "bold";
+      playerDiv.textContent += " (Sacador)";
     }
+    teamAdiv.appendChild(playerDiv);
+  });
 
-    container.appendChild(createTeamDiv(state.teamAName, state.teamA, "A"));
-    container.appendChild(createTeamDiv(state.teamBName, state.teamB, "B"));
-  }
-
-  function updateScores() {
-    const state = gameState.getState();
-    document.getElementById("teamA-score").textContent = state.scoreA;
-    document.getElementById("teamB-score").textContent = state.scoreB;
-  }
-
-  function renderSummary() {
-    const state = gameState.getState();
-    updateScores();
-
-    let summaryText = `Fase do Torneio: ${state.tournamentPhase}\n`;
-    summaryText += `Sets jogados: ${state.sets.length}\n\n`;
-    state.sets.forEach(s => {
-      summaryText += `Set ${s.set}: ${state.teamAName} ${s.scoreA} x ${s.scoreB} ${state.teamBName}\n`;
-    });
-    summaryText += `\nPlacar atual: ${state.teamAName} ${state.scoreA} x ${state.scoreB} ${state.teamBName}\n`;
-    summaryText += `Sacador atual: ${state.server ? (state.server.team === "A" ? state.teamA[state.server.index] : state.teamB[state.server.index]) : "N/D"}\n`;
-
-    document.getElementById("summary").textContent = summaryText;
-  }
-
-  function updateFinishedGamesList() {
-    const state = gameState.getState();
-    const container = document.getElementById("finishedGamesList");
-    if (state.finishedGames.length === 0) {
-      container.innerHTML = "<i>Nenhum jogo finalizado salvo.</i>";
-      return;
+  const teamBdiv = document.createElement("div");
+  teamBdiv.classList.add("team");
+  teamBdiv.innerHTML = `<h3>${teamBName}</h3>`;
+  teamB.forEach((player, idx) => {
+    const playerDiv = document.createElement("div");
+    playerDiv.textContent = player;
+    if (server && server.team === "B" && server.index === idx) {
+      playerDiv.style.fontWeight = "bold";
+      playerDiv.textContent += " (Sacador)";
     }
-    container.innerHTML = "";
-    state.finishedGames.forEach((game, i) => {
-      const div = document.createElement("div");
-      div.textContent = `${i+1}. ${game.teamAName} vs ${game.teamBName} - Fase: ${game.phase} - Vencedor: ${game.winner} (${game.sets.length} sets)`;
-      container.appendChild(div);
+    teamBdiv.appendChild(playerDiv);
+  });
+
+  container.appendChild(teamAdiv);
+  container.appendChild(teamBdiv);
+}
+
+// Atualiza nomes dos botões com os nomes das duplas
+function updateButtonNames() {
+  document.getElementById("btnTeamAName").textContent = teamAName;
+  document.getElementById("btnTeamBName").textContent = teamBName;
+}
+
+// Atualiza o resumo da partida com os sets finalizados e placar parcial
+function updateSummary() {
+  let text = `Sets finalizados:\n`;
+  if (sets.length === 0) {
+    text += "Nenhum set finalizado.\n";
+  } else {
+    sets.forEach(set => {
+      text += `Set ${set.setNumber}: ${set.scoreA} x ${set.scoreB}\n`;
     });
   }
+  text += `\nPontuação atual:\n${scoreA} x ${scoreB}\n`;
+  document.getElementById("summary").textContent = text;
+}
 
-  function updateFinishedGamesSetupList() {
-    const state = gameState.getState();
-    const container = document.getElementById("finishedGamesSetupList");
-    if (state.finishedGames.length === 0) {
-      container.innerHTML = "<option disabled selected>-- Nenhum jogo salvo --</option>";
-      return;
-    }
-    container.innerHTML = "";
-    state.finishedGames.forEach((game, i) => {
-      const option = document.createElement("option");
-      option.value = i;
-      option.textContent = `${game.teamAName} vs ${game.teamBName} (${game.phase})`;
-      container.appendChild(option);
-    });
+// Renderiza a lista de jogos finalizados na tela de configuração e na tela do jogo
+function renderFinishedGames() {
+  const finishedListSetup = document.getElementById("finishedGamesSetupList");
+  const finishedListGame = document.getElementById("finishedGamesList");
+
+  if (finishedGames.length === 0) {
+    finishedListSetup.innerHTML = "<i>Nenhum jogo finalizado salvo.</i>";
+    finishedListGame.innerHTML = "<i>Nenhum jogo finalizado salvo.</i>";
+    return;
   }
 
-  return {
-    renderPlayers,
-    updateScores,
-    renderSummary,
-    updateFinishedGamesList,
-    updateFinishedGamesSetupList
-  };
-})();
+  const html = finishedGames.map(game => {
+    return `<div>${game.teamAName} vs ${game.teamBName} - Vencedor: ${game.winner === "A" ? game.teamAName : game.teamBName} - Fase: ${game.tournamentPhase}</div>`;
+  }).join("");
+
+  finishedListSetup.innerHTML = html;
+  finishedListGame.innerHTML = html;
+}
