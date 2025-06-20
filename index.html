@@ -1,12 +1,144 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Súmula Vôlei Dupla</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Vôlei de Dupla - Placar</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      background: #f2f2f2;
+      padding: 20px;
+    }
+    h1 { margin-bottom: 10px; }
+    .team {
+      margin: 20px 0;
+    }
+    .score {
+      font-size: 2rem;
+      margin: 10px 0;
+    }
+    .serving {
+      color: green;
+      font-weight: bold;
+    }
+    button {
+      font-size: 1.2rem;
+      margin: 5px;
+      padding: 10px 20px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Placar - Vôlei de Dupla</h1>
+
+  <div id="set-info">Set 1</div>
+
+  <div class="team">
+    <h2>Time A</h2>
+    <div id="teamA-players"></div>
+    <div class="score" id="scoreA">0</div>
+    <button onclick="addPoint('A')">+ Ponto</button>
+  </div>
+
+  <div class="team">
+    <h2>Time B</h2>
+    <div id="teamB-players"></div>
+    <div class="score" id="scoreB">0</div>
+    <button onclick="addPoint('B')">+ Ponto</button>
+  </div>
+
+  <div>
+    <h3>Ações de saque</h3>
+    <button onclick="registerServe(true)">Saque bom</button>
+    <button onclick="registerServe(false)">Erro de saque</button>
+  </div>
+
+  <div style="margin-top: 20px;">
+    <button onclick="finishSet()">Finalizar Set</button>
+  </div>
+
+  <div id="summary" style="margin-top: 30px;"></div>
+
+  <script>
+    // Jogadores fixos por enquanto
+    const teamA = ["Ana", "Bia"];
+    const teamB = ["Clara", "Duda"];
+
+    let scoreA = 0;
+    let scoreB = 0;
+    let currentSet = 1;
+    let sets = [];
+    let currentServer = { team: 'A', index: 0 }; // time A começa sacando
+
+    const serveCount = {
+      A: [0, 0], B: [0, 0],
+      errors: { A: [0, 0], B: [0, 0] }
+    };
+
+    function renderPlayers() {
+      const aNames = teamA.map((name, i) =>
+        currentServer.team === 'A' && currentServer.index === i
+          ? `<div class="serving">➡️ ${name}</div>`
+          : `<div>${name}</div>`
+      ).join("");
+      const bNames = teamB.map((name, i) =>
+        currentServer.team === 'B' && currentServer.index === i
+          ? `<div class="serving">➡️ ${name}</div>`
+          : `<div>${name}</div>`
+      ).join("");
+
+      document.getElementById("teamA-players").innerHTML = aNames;
+      document.getElementById("teamB-players").innerHTML = bNames;
+    }
+
+    function addPoint(team) {
+      if (team === 'A') scoreA++;
+      else scoreB++;
+      updateScores();
+
+      const ganhouSideOut = currentServer.team !== team;
+      if (ganhouSideOut) {
+        currentServer.team = team;
+        currentServer.index = (currentServer.index + 1) % 2; // alterna sacador
+      }
+      renderPlayers();
+    }
+
+    function registerServe(success) {
+      const { team, index } = currentServer;
+      serveCount[team][index]++;
+      if (!success) {
+        serveCount.errors[team][index]++;
+        // ponto automático para o outro time
+        addPoint(team === 'A' ? 'B' : 'A');
+      }
+    }
+
+    function updateScores() {
+      document.getElementById("scoreA").textContent = scoreA;
+      document.getElementById("scoreB").textContent = scoreB;
+    }
+
+    function finishSet() {
+      sets.push({ set: currentSet, A: scoreA, B: scoreB });
+      const resumo = sets.map(s =>
+        `Set ${s.set}: ${s.A} x ${s.B}`
+      ).join("<br>");
+
+      document.getElementById("summary").innerHTML =
+        `<h3>Súmula</h3>${resumo}`;
+      
+      currentSet++;
+      scoreA = 0;
+      scoreB = 0;
+      updateScores();
+      document.getElementById("set-info").textContent = `Set ${currentSet}`;
+    }
+
+    renderPlayers();
+    updateScores();
+  </script>
+</body>
 </html>
