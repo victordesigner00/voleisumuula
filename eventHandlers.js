@@ -1,3 +1,5 @@
+import { validateSetup } from './gameState.js';
+
 // Inicia o jogo a partir dos inputs do setup
 function startGame() {
   const aName = document.getElementById("teamAName").value.trim();
