@@ -1,6 +1,17 @@
-import { validateSetup } from './gameState.js';
+import {
+  validateSetup,
+  addPoint,
+  undoLastAction,
+  finishSet,
+  finishGame,
+  changeTournamentPhase,
+  renderPlayers,
+  updateScoreboard,
+  updateSummary,
+  renderFinishedGames,
+  gameState // objeto que mantém o estado
+} from './gameState.js';
 
-// Inicia o jogo a partir dos inputs do setup
 function startGame() {
   const aName = document.getElementById("teamAName").value.trim();
   const aPlayers = document.getElementById("teamAPlayers").value.split(",").map(s => s.trim()).filter(Boolean);
@@ -12,27 +23,27 @@ function startGame() {
 
   if (!validateSetup(aName, aPlayers, bName, bPlayers, phase, initialServerTeam, initialServerIndex)) return;
 
-  // Inicializa estado
-  teamAName = aName;
-  teamBName = bName;
-  teamA = aPlayers;
-  teamB = bPlayers;
-  tournamentPhase = phase;
-  server = {team: initialServerTeam, index: initialServerIndex};
-  currentSet = 1;
-  sets = [];
-  scoreA = 0;
-  scoreB = 0;
-  historyStack = [];
-  lastScoringTeam = null;
-  lastServerIndexA = initialServerTeam === "A" ? initialServerIndex : 0;
-  lastServerIndexB = initialServerTeam === "B" ? initialServerIndex : 0;
+  // Atualiza o estado do jogo centralizado
+  gameState.teamAName = aName;
+  gameState.teamBName = bName;
+  gameState.teamA = aPlayers;
+  gameState.teamB = bPlayers;
+  gameState.tournamentPhase = phase;
+  gameState.server = { team: initialServerTeam, index: initialServerIndex };
+  gameState.currentSet = 1;
+  gameState.sets = [];
+  gameState.scoreA = 0;
+  gameState.scoreB = 0;
+  gameState.historyStack = [];
+  gameState.lastScoringTeam = null;
+  gameState.lastServerIndexA = initialServerTeam === "A" ? initialServerIndex : 0;
+  gameState.lastServerIndexB = initialServerTeam === "B" ? initialServerIndex : 0;
 
   // Ajusta interface
   document.getElementById("setupContainer").classList.add("hidden");
   document.getElementById("gameContainer").classList.remove("hidden");
-  document.getElementById("displayTeams").textContent = `${teamAName} x ${teamBName}`;
-  document.getElementById("tournamentPhase").value = tournamentPhase;
+  document.getElementById("displayTeams").textContent = `${gameState.teamAName} x ${gameState.teamBName}`;
+  document.getElementById("tournamentPhase").value = gameState.tournamentPhase;
 
   updateButtonNames();
   renderPlayers();
@@ -41,13 +52,13 @@ function startGame() {
   renderFinishedGames();
 }
 
-// Pontuar para o time A ou B
 function pointForTeamA() {
   addPoint("A");
   renderPlayers();
   updateScoreboard();
   updateSummary();
 }
+
 function pointForTeamB() {
   addPoint("B");
   renderPlayers();
@@ -55,7 +66,6 @@ function pointForTeamB() {
   updateSummary();
 }
 
-// Desfaz última ação
 function undo() {
   if (undoLastAction()) {
     renderPlayers();
@@ -66,17 +76,15 @@ function undo() {
   }
 }
 
-// Finaliza set
 function finishSetHandler() {
   if (finishSet()) {
     renderPlayers();
     updateScoreboard();
     updateSummary();
-    alert(`Set ${currentSet - 1} finalizado.`);
+    alert(`Set ${gameState.currentSet - 1} finalizado.`);
   }
 }
 
-// Finaliza jogo
 function finishGameHandler() {
   if (finishGame()) {
     alert("Jogo finalizado!");
@@ -86,13 +94,11 @@ function finishGameHandler() {
   }
 }
 
-// Alterar fase do torneio durante o jogo
 function changePhase() {
   const phase = document.getElementById("tournamentPhase").value;
   changeTournamentPhase(phase);
 }
 
-// Configura listeners
 document.getElementById("startGameBtn").addEventListener("click", startGame);
 document.getElementById("pointTeamA").addEventListener("click", pointForTeamA);
 document.getElementById("pointTeamB").addEventListener("click", pointForTeamB);
