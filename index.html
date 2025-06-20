@@ -5,35 +5,210 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Placar de Vôlei com Configuração Inicial</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 20px;
-    }
-    .hidden {
-      display: none;
-    }
-    .btn {
-      margin: 5px 0;
-      padding: 8px 12px;
-      cursor: pointer;
-    }
-    input[type="text"], select {
-      padding: 6px;
-      width: 200px;
-      margin-bottom: 10px;
-    }
-    .players-container {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 20px;
-    }
-    .team {
-      flex: 1;
-      margin-right: 10px;
-    }
-    .team:last-child {
-      margin-right: 0;
-    }
+   /* Reset básico e fonte */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: #f4f6f8;
+  color: #222;
+  margin: 20px;
+  padding: 0;
+}
+
+/* Container principal */
+#gameContainer {
+  background: white;
+  border-radius: 10px;
+  max-width: 700px;
+  margin: auto;
+  padding: 20px 30px 30px 30px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+/* Cabeçalho */
+h1, h2, h3, h4 {
+  margin: 0 0 10px 0;
+  font-weight: 700;
+  color: #2c3e50;
+}
+
+h1 {
+  font-size: 2rem;
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+h2 {
+  font-size: 1.5rem;
+  margin-bottom: 20px;
+}
+
+/* Setup e form */
+#setupContainer input[type="text"],
+#setupContainer select {
+  width: 100%;
+  padding: 10px 12px;
+  font-size: 1rem;
+  border-radius: 6px;
+  border: 1px solid #bbb;
+  margin-bottom: 15px;
+  transition: border-color 0.3s;
+}
+
+#setupContainer input[type="text"]:focus,
+#setupContainer select:focus {
+  outline: none;
+  border-color: #3498db;
+  box-shadow: 0 0 6px #a8d0fb;
+}
+
+/* Botões */
+.btn {
+  background-color: #3498db;
+  border: none;
+  color: white;
+  padding: 12px 18px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 1rem;
+  margin: 6px 8px 12px 0;
+  transition: background-color 0.25s ease;
+  user-select: none;
+  box-shadow: 0 3px 6px rgba(52,152,219,0.4);
+}
+
+.btn:hover {
+  background-color: #2980b9;
+  box-shadow: 0 5px 12px rgba(41,128,185,0.6);
+}
+
+.btn:active {
+  background-color: #1c5980;
+  box-shadow: none;
+}
+
+/* Container dos jogadores */
+.players-container {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 25px;
+}
+
+/* Time e jogadores */
+.team {
+  flex: 1;
+  background: #ecf0f1;
+  padding: 15px 20px;
+  border-radius: 8px;
+  box-shadow: inset 0 0 8px rgba(0,0,0,0.05);
+  min-width: 140px;
+}
+
+.team h4 {
+  margin-bottom: 12px;
+  color: #34495e;
+  border-bottom: 2px solid #3498db;
+  padding-bottom: 5px;
+  font-size: 1.1rem;
+  user-select: none;
+}
+
+.team p {
+  font-size: 1.1rem;
+  margin: 6px 0;
+  padding-left: 10px;
+  position: relative;
+  user-select: none;
+}
+
+.team p.serve {
+  font-weight: 700;
+  color: #27ae60;
+}
+
+.team p.serve::after {
+  content: "🎾";
+  position: absolute;
+  right: 10px;
+  font-size: 1.2rem;
+  top: 0;
+  user-select: none;
+}
+
+/* Placar principal */
+#summary {
+  background: #fafafa;
+  border: 2px solid #3498db;
+  border-radius: 8px;
+  padding: 20px 25px;
+  font-family: monospace, monospace;
+  font-size: 1.15rem;
+  line-height: 1.4;
+  white-space: pre-wrap;
+  margin-bottom: 25px;
+  color: #2c3e50;
+  user-select: none;
+}
+
+/* Seletor da fase */
+#tournamentPhase {
+  margin-bottom: 20px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid #bbb;
+  font-size: 1rem;
+}
+
+/* Visibilidade */
+.hidden {
+  display: none;
+}
+
+/* Container de jogos finalizados */
+#finishedGamesList {
+  font-size: 1rem;
+  color: #555;
+  max-height: 200px;
+  overflow-y: auto;
+  padding-right: 10px;
+}
+
+/* Scrollbar customizada */
+#finishedGamesList::-webkit-scrollbar {
+  width: 8px;
+}
+
+#finishedGamesList::-webkit-scrollbar-thumb {
+  background-color: #3498db;
+  border-radius: 8px;
+}
+
+#finishedGamesList div {
+  padding: 6px 0;
+  border-bottom: 1px solid #ddd;
+  user-select: none;
+}
+
+/* Layout responsivo */
+@media (max-width: 520px) {
+  .players-container {
+    flex-direction: column;
+  }
+  .team {
+    width: 100%;
+    margin-bottom: 15px;
+  }
+  .btn {
+    width: 100%;
+    margin: 8px 0;
+  }
+}
+
   </style>
 </head>
 <body>
