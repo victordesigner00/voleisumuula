@@ -2,8 +2,8 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Vôlei de Dupla</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Vôlei de Dupla - Gestão de Jogos</title>
   <style>
     body {
       font-family: sans-serif;
@@ -11,11 +11,18 @@
       padding: 20px;
       text-align: center;
     }
-    h1 {
+    h1, h2, h3 {
       margin-bottom: 10px;
     }
     .team {
       margin: 20px 0;
+      background: white;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 0 6px rgba(0,0,0,0.1);
+      max-width: 400px;
+      margin-left: auto;
+      margin-right: auto;
     }
     .score {
       font-size: 2rem;
@@ -43,16 +50,16 @@
       align-items: center;
     }
     #summary {
-      margin-top: 30px;
+      margin-top: 15px;
       max-width: 400px;
       margin-left: auto;
       margin-right: auto;
       text-align: left;
-      background: white;
+      background: #fff;
       padding: 15px;
       border-radius: 8px;
-      box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
-      white-space: pre-wrap;
+      box-shadow: 0 0 8px rgba(0,0,0,0.1);
+      min-height: 80px;
     }
     #historyLog {
       max-height: 150px;
@@ -65,53 +72,38 @@
       white-space: pre-wrap;
       text-align: left;
     }
-    #savedGamesDashboard {
-      position: fixed;
-      top: 10px;
-      right: 10px;
-      background: white;
-      width: 350px;
-      max-height: 90vh;
-      overflow-y: auto;
-      box-shadow: 0 0 15px rgba(0,0,0,0.3);
+    #finishedGamesDashboard {
+      margin-top: 40px;
+      max-width: 800px;
+      margin-left: auto;
+      margin-right: auto;
+      background: #fff;
+      padding: 15px;
       border-radius: 8px;
-      padding: 10px;
-      display: none;
+      box-shadow: 0 0 8px rgba(0,0,0,0.1);
       text-align: left;
-      z-index: 1000;
     }
-    #savedGamesDashboard h2 {
-      margin-top: 0;
-    }
-    .saved-game {
+    .finishedGame {
       border-bottom: 1px solid #ccc;
-      padding: 5px 0;
+      padding: 8px 0;
     }
-    .saved-game:last-child {
+    .finishedGame:last-child {
       border-bottom: none;
     }
-    .saved-game button {
+    .finishedGame > div {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .btn-small {
+      padding: 4px 8px;
       font-size: 0.9rem;
       margin-left: 5px;
-      padding: 3px 7px;
-    }
-    #dashboardToggleBtn {
-      position: fixed;
-      top: 10px;
-      right: 370px;
-      padding: 10px 15px;
-      background: #007BFF;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      font-weight: bold;
-      cursor: pointer;
-      z-index: 1001;
     }
   </style>
 </head>
 <body>
-  <h1>Placar - Vôlei de Dupla</h1>
+  <h1>Placar - Vôlei de Dupla (Gerenciamento de Jogos)</h1>
 
   <div>
     <label for="tournamentPhase">Fase do Torneio:</label>
@@ -144,7 +136,7 @@
   <div style="margin-top: 20px;">
     <button onclick="finishSet()">Finalizar Set</button>
     <button onclick="undo()">Desfazer último ponto</button>
-    <button onclick="finishGame()" style="background:#28a745; color:white;">Finalizar Jogo</button>
+    <button onclick="finishGame()" style="background:#d9534f;color:white;">Finalizar Jogo</button>
   </div>
 
   <div style="margin-top: 20px;">
@@ -155,13 +147,12 @@
 
   <div id="summary"></div>
 
-  <button id="dashboardToggleBtn" onclick="toggleDashboard()">Jogos Salvos</button>
-  <div id="savedGamesDashboard">
-    <h2>Jogos Salvos</h2>
-    <div id="savedGamesList">Nenhum jogo salvo.</div>
-    <button onclick="closeDashboard()" style="margin-top:10px;">Fechar</button>
-    <pre id="savedGameDetails" style="white-space: pre-wrap; margin-top: 15px; background:#f8f9fa; padding:10px; border-radius:5px; max-height:300px; overflow-y:auto; display:none;"></pre>
-  </div>
+  <section id="finishedGamesDashboard">
+    <h2>Jogos Finalizados</h2>
+    <div id="finishedGamesList">
+      <!-- Lista de jogos finalizados aqui -->
+    </div>
+  </section>
 
   <script>
     // Estado inicial dos jogadores
@@ -171,21 +162,21 @@
     // Histórico para undo
     const historyStack = [];
 
-    // Estado do jogo
+    // Estado do jogo atual
     let scoreA = 0;
     let scoreB = 0;
     let currentSet = 1;
     let sets = [];
-    let server = { team: 'A', index: 0 };  // Quem está sacando
+    let server = { team: 'A', index: 0 };
     let lastScoringTeam = null;
     let tournamentPhase = "Fase de Grupos";
 
-    // Controle alternância servidor por time
+    // Estado geral para jogos finalizados
+    let finishedGames = [];
+
+    // Histórico de servidores para alternância
     let lastServerIndexA = 0;
     let lastServerIndexB = 0;
-
-    // Jogos salvos
-    let savedGames = [];
 
     // --- Funções básicas ---
 
@@ -200,11 +191,12 @@
         server,
         lastScoringTeam,
         tournamentPhase,
+        historyStack,
         lastServerIndexA,
-        lastServerIndexB,
-        historyStack
+        lastServerIndexB
       };
       localStorage.setItem('voleiState', JSON.stringify(state));
+      localStorage.setItem('finishedGames', JSON.stringify(finishedGames));
     }
 
     function loadState() {
@@ -221,6 +213,8 @@
           server = state.server ?? { team: 'A', index: 0 };
           lastScoringTeam = state.lastScoringTeam ?? null;
           tournamentPhase = state.tournamentPhase ?? "Fase de Grupos";
+          historyStack.length = 0;
+          if(state.historyStack) state.historyStack.forEach(h => historyStack.push(h));
           lastServerIndexA = state.lastServerIndexA ?? 0;
           lastServerIndexB = state.lastServerIndexB ?? 0;
           document.getElementById("tournamentPhase").value = tournamentPhase;
@@ -229,27 +223,19 @@
           localStorage.removeItem('voleiState');
         }
       }
-    }
 
-    function saveSavedGames() {
-      localStorage.setItem('voleiSavedGames', JSON.stringify(savedGames));
-    }
-
-    function loadSavedGames() {
-      const saved = localStorage.getItem('voleiSavedGames');
-      if (saved) {
+      const finishedSaved = localStorage.getItem('finishedGames');
+      if (finishedSaved) {
         try {
-          savedGames = JSON.parse(saved);
+          finishedGames = JSON.parse(finishedSaved);
         } catch {
-          savedGames = [];
-          localStorage.removeItem('voleiSavedGames');
+          localStorage.removeItem('finishedGames');
+          finishedGames = [];
         }
       }
     }
 
-    // Render dos jogadores com indicação do sacador
     function renderPlayers() {
-      // Render time A
       const aHTML = teamA.map((name, i) =>
         (server.team === 'A' && server.index === i)
           ? `<div class="serving">➡️ ${name}</div>`
@@ -257,7 +243,6 @@
       ).join("");
       document.getElementById("teamA-players").innerHTML = aHTML;
 
-      // Render time B
       const bHTML = teamB.map((name, i) =>
         (server.team === 'B' && server.index === i)
           ? `<div class="serving">➡️ ${name}</div>`
@@ -266,7 +251,6 @@
       document.getElementById("teamB-players").innerHTML = bHTML;
     }
 
-    // Render inputs para editar nomes
     function renderPlayerInputs() {
       const containerA = document.getElementById("teamA-inputs");
       const containerB = document.getElementById("teamB-inputs");
@@ -280,7 +264,7 @@
         input.value = name;
         input.size = 8;
         input.onchange = e => {
-          teamA[i] = e.target.value.trim() || `Jogador A${i + 1}`;
+          teamA[i] = e.target.value.trim() || `Jogador A${i+1}`;
           saveState();
           renderPlayers();
           renderPlayerInputs();
@@ -294,7 +278,7 @@
         input.value = name;
         input.size = 8;
         input.onchange = e => {
-          teamB[i] = e.target.value.trim() || `Jogador B${i + 1}`;
+          teamB[i] = e.target.value.trim() || `Jogador B${i+1}`;
           saveState();
           renderPlayers();
           renderPlayerInputs();
@@ -303,155 +287,124 @@
       });
     }
 
-    // Atualiza placar
     function updateScores() {
       document.getElementById("scoreA").textContent = scoreA;
       document.getElementById("scoreB").textContent = scoreB;
-      renderPlayers();
     }
 
-    // Alternar sacador
-    function switchServer() {
-      if (server.team === 'A') {
-        lastServerIndexB = (lastServerIndexB + 1) % teamB.length;
-        server = { team: 'B', index: lastServerIndexB };
-      } else {
-        lastServerIndexA = (lastServerIndexA + 1) % teamA.length;
-        server = { team: 'A', index: lastServerIndexA };
-      }
-    }
-
-    // Adiciona ponto para time
-    function addPoint(team) {
-      historyStack.push({
+    function pushHistory() {
+      const snapshot = {
+        teamA: [...teamA],
+        teamB: [...teamB],
         scoreA,
         scoreB,
+        currentSet,
+        sets: JSON.parse(JSON.stringify(sets)),
         server: { ...server },
+        lastScoringTeam,
+        tournamentPhase,
         lastServerIndexA,
-        lastServerIndexB,
-        lastScoringTeam
-      });
+        lastServerIndexB
+      };
+      historyStack.push(snapshot);
+      if (historyStack.length > 100) historyStack.shift(); // limite razoável
+    }
+
+    function addPoint(team) {
+      pushHistory();
 
       if (team === 'A') {
         scoreA++;
+        lastScoringTeam = 'A';
       } else {
         scoreB++;
+        lastScoringTeam = 'B';
       }
-      lastScoringTeam = team;
 
-      // Regra simples de troca de sacador a cada ponto (você pode ajustar)
-      switchServer();
+      // Alternar saque se ponto para quem não estava sacando
+      if (server.team !== lastScoringTeam) {
+        if (lastScoringTeam === 'A') {
+          lastServerIndexA = (lastServerIndexA + 1) % teamA.length;
+          server = { team: 'A', index: lastServerIndexA };
+        } else {
+          lastServerIndexB = (lastServerIndexB + 1) % teamB.length;
+          server = { team: 'B', index: lastServerIndexB };
+        }
+      }
 
       updateScores();
+      renderPlayers();
+      renderSummary();
       saveState();
-      updateSummary();
     }
 
-    // Desfazer último ponto
     function undo() {
-      if (historyStack.length === 0) return alert("Nada para desfazer");
-      const lastState = historyStack.pop();
-      scoreA = lastState.scoreA;
-      scoreB = lastState.scoreB;
-      server = lastState.server;
-      lastServerIndexA = lastState.lastServerIndexA;
-      lastServerIndexB = lastState.lastServerIndexB;
-      lastScoringTeam = lastState.lastScoringTeam;
+      if (historyStack.length === 0) return alert("Nada a desfazer");
+      const last = historyStack.pop();
+
+      teamA = last.teamA;
+      teamB = last.teamB;
+      scoreA = last.scoreA;
+      scoreB = last.scoreB;
+      currentSet = last.currentSet;
+      sets = last.sets;
+      server = last.server;
+      lastScoringTeam = last.lastScoringTeam;
+      tournamentPhase = last.tournamentPhase;
+      lastServerIndexA = last.lastServerIndexA;
+      lastServerIndexB = last.lastServerIndexB;
+
+      document.getElementById("tournamentPhase").value = tournamentPhase;
+      document.getElementById("set-info").textContent = `Set ${currentSet}`;
+
       updateScores();
+      renderPlayers();
+      renderSummary();
       saveState();
-      updateSummary();
     }
 
-    // Finaliza o set atual, salva no histórico de sets e zera placar para próximo set
     function finishSet() {
-      if (scoreA === 0 && scoreB === 0) {
-        alert("Não é possível finalizar um set sem pontos.");
+      if(scoreA === scoreB) {
+        alert("O set não pode terminar empatado.");
         return;
       }
-
       sets.push({ setNumber: currentSet, scoreA, scoreB });
       currentSet++;
       scoreA = 0;
       scoreB = 0;
-      // Resetar sacador pro time A no começo do set
       server = { team: 'A', index: 0 };
       lastServerIndexA = 0;
       lastServerIndexB = 0;
-      historyStack.length = 0; // Limpa histórico de undo após finalizar set
-      document.getElementById("set-info").textContent = `Set ${currentSet}`;
-      updateScores();
-      saveState();
-      updateSummary();
-    }
-
-    // Atualiza o texto da súmula do jogo
-    function updateSummary() {
-      if (sets.length === 0 && scoreA === 0 && scoreB === 0) {
-        document.getElementById("summary").textContent = "Jogo ainda não começou.";
-        return;
-      }
-
-      let text = `Fase: ${tournamentPhase}\n\nJogadores:\nTime A: ${teamA.join(", ")}\nTime B: ${teamB.join(", ")}\n\n`;
-
-      text += "Sets finalizados:\n";
-      if (sets.length === 0) {
-        text += "Nenhum.\n";
-      } else {
-        sets.forEach(s => {
-          text += `Set ${s.setNumber}: Time A ${s.scoreA} x Time B ${s.scoreB}\n`;
-        });
-      }
-
-      text += `\nSet atual (${currentSet}): Time A ${scoreA} x Time B ${scoreB}\n`;
-      text += `Sacador: Time ${server.team} - ${server.team === 'A' ? teamA[server.index] : teamB[server.index]}\n`;
-
-      document.getElementById("summary").textContent = text;
-    }
-
-    // Finaliza o jogo, salva no histórico de jogos finalizados e limpa o estado atual
-    function finishGame() {
-      if (sets.length === 0) {
-        alert("Finalize pelo menos um set antes de finalizar o jogo.");
-        return;
-      }
-
-      // Salva o jogo finalizado
-      const finishedGame = {
-        timestamp: new Date().toISOString(),
-        tournamentPhase,
-        teamA: [...teamA],
-        teamB: [...teamB],
-        sets: [...sets],
-      };
-      savedGames.push(finishedGame);
-      saveSavedGames();
-
-      // Resetar estado para jogo novo
-      teamA = ["Ana", "Bia"];
-      teamB = ["Clara", "Duda"];
-      scoreA = 0;
-      scoreB = 0;
-      currentSet = 1;
-      sets = [];
-      server = { team: 'A', index: 0 };
       lastScoringTeam = null;
-      lastServerIndexA = 0;
-      lastServerIndexB = 0;
-      historyStack.length = 0;
-      tournamentPhase = "Fase de Grupos";
-      document.getElementById("tournamentPhase").value = tournamentPhase;
+      historyStack.length = 0; // limpa histórico para o novo set
       document.getElementById("set-info").textContent = `Set ${currentSet}`;
-      renderPlayerInputs();
       updateScores();
-      updateSummary();
-      renderSavedGamesList();
-
-      alert("Jogo finalizado e salvo.");
+      renderPlayers();
+      renderSummary();
+      saveState();
     }
 
-    // Exporta jogo atual para JSON
+    function changePhase() {
+      tournamentPhase = document.getElementById("tournamentPhase").value;
+      renderSummary();
+      saveState();
+    }
+
+    function renderSummary() {
+      const summary = [];
+      summary.push(`Fase do Torneio: ${tournamentPhase}`);
+      summary.push(`Set Atual: ${currentSet}`);
+      summary.push(`Placar atual: Time A ${scoreA} x ${scoreB} Time B`);
+      summary.push(`Servidor: ${server.team} - ${server.index + 1} (${(server.team === 'A' ? teamA[server.index] : teamB[server.index])})`);
+      if (sets.length > 0) {
+        summary.push("Sets finalizados:");
+        sets.forEach(s => summary.push(`  Set ${s.setNumber}: Time A ${s.scoreA} x ${s.scoreB} Time B`));
+      }
+      document.getElementById("summary").textContent = summary.join("\n");
+    }
+
     function exportGame() {
-      const game = {
+      const gameData = {
         teamA,
         teamB,
         scoreA,
@@ -460,138 +413,206 @@
         sets,
         server,
         lastScoringTeam,
-        tournamentPhase
+        tournamentPhase,
+        lastServerIndexA,
+        lastServerIndexB
       };
-      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(game, null, 2));
-      const dlAnchor = document.createElement('a');
-      dlAnchor.setAttribute("href", dataStr);
-      dlAnchor.setAttribute("download", "jogo_volei.json");
-      document.body.appendChild(dlAnchor);
-      dlAnchor.click();
-      dlAnchor.remove();
+      const json = JSON.stringify(gameData, null, 2);
+      const blob = new Blob([json], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `jogo_volei_${Date.now()}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
     }
 
-    // Importa jogo de JSON
     function importGame(event) {
       const file = event.target.files[0];
       if (!file) return;
       const reader = new FileReader();
-      reader.onload = function(e) {
+      reader.onload = e => {
         try {
-          const game = JSON.parse(e.target.result);
-          teamA = game.teamA ?? ["Ana", "Bia"];
-          teamB = game.teamB ?? ["Clara", "Duda"];
-          scoreA = game.scoreA ?? 0;
-          scoreB = game.scoreB ?? 0;
-          currentSet = game.currentSet ?? 1;
-          sets = game.sets ?? [];
-          server = game.server ?? { team: 'A', index: 0 };
-          lastScoringTeam = game.lastScoringTeam ?? null;
-          tournamentPhase = game.tournamentPhase ?? "Fase de Grupos";
+          const data = JSON.parse(e.target.result);
+          teamA = data.teamA ?? ["Ana", "Bia"];
+          teamB = data.teamB ?? ["Clara", "Duda"];
+          scoreA = data.scoreA ?? 0;
+          scoreB = data.scoreB ?? 0;
+          currentSet = data.currentSet ?? 1;
+          sets = data.sets ?? [];
+          server = data.server ?? { team: 'A', index: 0 };
+          lastScoringTeam = data.lastScoringTeam ?? null;
+          tournamentPhase = data.tournamentPhase ?? "Fase de Grupos";
+          lastServerIndexA = data.lastServerIndexA ?? 0;
+          lastServerIndexB = data.lastServerIndexB ?? 0;
+
           document.getElementById("tournamentPhase").value = tournamentPhase;
           document.getElementById("set-info").textContent = `Set ${currentSet}`;
+
           historyStack.length = 0;
+          renderPlayers();
           renderPlayerInputs();
           updateScores();
-          updateSummary();
+          renderSummary();
           saveState();
-          alert("Jogo importado com sucesso.");
+          alert("Jogo importado com sucesso!");
         } catch {
-          alert("Arquivo inválido.");
+          alert("Arquivo JSON inválido.");
         }
       };
       reader.readAsText(file);
-      event.target.value = ""; // limpar input
+      event.target.value = "";
     }
 
-    // Alterar fase do torneio
-    function changePhase() {
-      tournamentPhase = document.getElementById("tournamentPhase").value;
-      updateSummary();
+    function finishGame() {
+      if (sets.length === 0) {
+        alert("Finalize ao menos um set antes de finalizar o jogo.");
+        return;
+      }
+      // Guardar o jogo atual na lista de jogos finalizados
+      const finalGame = {
+        id: Date.now(),
+        teamA,
+        teamB,
+        sets,
+        winner: determineWinner(),
+        tournamentPhase,
+        date: new Date().toLocaleString()
+      };
+      finishedGames.push(finalGame);
+      saveState();
+      alert("Jogo finalizado e salvo.");
+
+      // Resetar estado do jogo atual para um novo jogo
+      resetCurrentGame();
+      renderFinishedGames();
+    }
+
+    function determineWinner() {
+      let winsA = 0;
+      let winsB = 0;
+      for (const s of sets) {
+        if (s.scoreA > s.scoreB) winsA++;
+        else if (s.scoreB > s.scoreA) winsB++;
+      }
+      if (winsA > winsB) return 'Time A';
+      if (winsB > winsA) return 'Time B';
+      return 'Empate';
+    }
+
+    function resetCurrentGame() {
+      scoreA = 0;
+      scoreB = 0;
+      currentSet = 1;
+      sets = [];
+      server = { team: 'A', index: 0 };
+      lastScoringTeam = null;
+      tournamentPhase = "Fase de Grupos";
+      lastServerIndexA = 0;
+      lastServerIndexB = 0;
+      historyStack.length = 0;
+      document.getElementById("tournamentPhase").value = tournamentPhase;
+      document.getElementById("set-info").textContent = `Set ${currentSet}`;
+      renderPlayers();
+      renderPlayerInputs();
+      updateScores();
+      renderSummary();
       saveState();
     }
 
-    // Toggle da dashboard de jogos salvos
-    function toggleDashboard() {
-      const dash = document.getElementById("savedGamesDashboard");
-      if (dash.style.display === "block") {
-        dash.style.display = "none";
-        document.getElementById("savedGameDetails").style.display = "none";
-      } else {
-        dash.style.display = "block";
-        renderSavedGamesList();
-      }
-    }
-
-    function closeDashboard() {
-      document.getElementById("savedGamesDashboard").style.display = "none";
-      document.getElementById("savedGameDetails").style.display = "none";
-    }
-
-    // Render lista de jogos salvos
-    function renderSavedGamesList() {
-      const container = document.getElementById("savedGamesList");
-      container.innerHTML = "";
-
-      if (savedGames.length === 0) {
-        container.textContent = "Nenhum jogo salvo.";
+    function renderFinishedGames() {
+      const container = document.getElementById("finishedGamesList");
+      if(finishedGames.length === 0) {
+        container.innerHTML = "<i>Nenhum jogo finalizado salvo.</i>";
         return;
       }
-
-      savedGames.forEach((game, idx) => {
-        const dateStr = new Date(game.timestamp).toLocaleString();
+      container.innerHTML = "";
+      finishedGames.forEach(game => {
         const div = document.createElement("div");
-        div.classList.add("saved-game");
+        div.classList.add("finishedGame");
         div.innerHTML = `
-          <strong>${dateStr}</strong><br>
-          Fase: ${game.tournamentPhase}<br>
-          Time A: ${game.teamA.join(", ")}<br>
-          Time B: ${game.teamB.join(", ")}<br>
-          Sets: ${game.sets.length}<br>
-          <button onclick="viewSavedGame(${idx})">Ver detalhes</button>
-          <button onclick="deleteSavedGame(${idx})" style="background:#dc3545;color:white;">Excluir</button>
+          <div>
+            <strong>${game.date} - ${game.tournamentPhase} - Vencedor: ${game.winner}</strong>
+            <div>
+              <button class="btn-small" onclick="viewFinishedGame(${game.id})">Ver detalhes</button>
+              <button class="btn-small" onclick="loadFinishedGame(${game.id})">Reabrir jogo</button>
+              <button class="btn-small" onclick="deleteFinishedGame(${game.id})" style="color:#d9534f;">Excluir</button>
+            </div>
+          </div>
+          <div id="details-${game.id}" style="display:none; margin-top: 5px; font-size: 0.9rem;"></div>
         `;
         container.appendChild(div);
       });
     }
 
-    // Visualizar detalhes do jogo salvo
-    function viewSavedGame(idx) {
-      const game = savedGames[idx];
+    function viewFinishedGame(id) {
+      const detailsDiv = document.getElementById(`details-${id}`);
+      if (!detailsDiv) return;
+
+      if (detailsDiv.style.display === "block") {
+        detailsDiv.style.display = "none";
+        detailsDiv.textContent = "";
+        return;
+      }
+
+      const game = finishedGames.find(g => g.id === id);
       if (!game) return;
-      const details = `
-Fase do Torneio: ${game.tournamentPhase}
 
-Time A: ${game.teamA.join(", ")}
-Time B: ${game.teamB.join(", ")}
+      let text = `Time A: ${game.teamA.join(", ")}\n`;
+      text += `Time B: ${game.teamB.join(", ")}\n`;
+      text += "Sets:\n";
+      game.sets.forEach(s => {
+        text += `  Set ${s.setNumber}: Time A ${s.scoreA} x ${s.scoreB} Time B\n`;
+      });
 
-Sets finalizados:
-${game.sets.map(s => `Set ${s.setNumber}: Time A ${s.scoreA} x Time B ${s.scoreB}`).join("\n")}
-      `;
-      const detailElem = document.getElementById("savedGameDetails");
-      detailElem.textContent = details;
-      detailElem.style.display = "block";
+      detailsDiv.textContent = text;
+      detailsDiv.style.display = "block";
     }
 
-    // Deletar jogo salvo
-    function deleteSavedGame(idx) {
-      if (!confirm("Excluir este jogo salvo?")) return;
-      savedGames.splice(idx, 1);
-      saveSavedGames();
-      renderSavedGamesList();
-      document.getElementById("savedGameDetails").style.display = "none";
+    function loadFinishedGame(id) {
+      const game = finishedGames.find(g => g.id === id);
+      if (!game) return alert("Jogo não encontrado.");
+
+      // Substituir o estado atual pelo jogo finalizado selecionado
+      teamA = [...game.teamA];
+      teamB = [...game.teamB];
+      sets = JSON.parse(JSON.stringify(game.sets));
+      currentSet = sets.length + 1;
+      scoreA = 0;
+      scoreB = 0;
+      server = { team: 'A', index: 0 };
+      lastServerIndexA = 0;
+      lastServerIndexB = 0;
+      lastScoringTeam = null;
+      tournamentPhase = game.tournamentPhase;
+
+      document.getElementById("tournamentPhase").value = tournamentPhase;
+      document.getElementById("set-info").textContent = `Set ${currentSet}`;
+
+      historyStack.length = 0;
+      renderPlayers();
+      renderPlayerInputs();
+      updateScores();
+      renderSummary();
+      saveState();
+
+      alert("Jogo reaberto para edição. O placar atual está zerado para novo set.");
+    }
+
+    function deleteFinishedGame(id) {
+      if(!confirm("Confirma excluir este jogo finalizado?")) return;
+      finishedGames = finishedGames.filter(g => g.id !== id);
+      saveState();
+      renderFinishedGames();
     }
 
     // Inicialização
-    function init() {
-      loadState();
-      loadSavedGames();
-      renderPlayerInputs();
-      updateScores();
-      updateSummary();
-    }
-
-    window.onload = init;
+    loadState();
+    renderPlayers();
+    renderPlayerInputs();
+    updateScores();
+    renderSummary();
+    renderFinishedGames();
   </script>
 </body>
 </html>
