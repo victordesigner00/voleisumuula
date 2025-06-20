@@ -5,10 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Placar de Vôlei com Configuração Inicial</title>
   <link rel="stylesheet" href="style.css" />
-  <script type="module" src="gameState.js"></script>
-<script type="module" src="eventHandlers.js"></script>
-<script type="module" src="renderUI.js"></script>
-
 </head>
 <body>
   <h1>Configuração do Jogo de Vôlei</h1>
@@ -102,8 +98,7 @@
     <div id="finishedGamesList"><i>Nenhum jogo finalizado salvo.</i></div>
   </div>
 
-  <script src="gameState.js"></script>
-  <script src="renderUI.js"></script>
-  <script src="eventHandlers.js"></script>
+  <!-- Carregue apenas eventHandlers.js como módulo -->
+  <script type="module" src="eventHandlers.js"></script>
 </body>
 </html>
