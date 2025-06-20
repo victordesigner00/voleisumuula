@@ -1,38 +1,25 @@
-/* style.css */
-
-/* Reset básico e fonte */
 body {
   font-family: Arial, sans-serif;
   margin: 20px;
 }
-
-/* Esconder elementos */
 .hidden {
   display: none;
 }
-
-/* Botões */
 .btn {
   margin: 5px 0;
   padding: 8px 12px;
   cursor: pointer;
 }
-
-/* Inputs e selects */
 input[type="text"], select {
   padding: 6px;
   width: 200px;
   margin-bottom: 10px;
 }
-
-/* Container de jogadores */
 .players-container {
   display: flex;
   justify-content: space-between;
   margin-bottom: 20px;
 }
-
-/* Times */
 .team {
   flex: 1;
   margin-right: 10px;
@@ -40,14 +27,10 @@ input[type="text"], select {
 .team:last-child {
   margin-right: 0;
 }
-
-/* Listas de jogos finalizados */
-#finishedGamesSetupList div,
-#finishedGamesList div {
+#finishedGamesSetupList div, #finishedGamesList div {
   margin-bottom: 4px;
 }
 
-/* Placar visual */
 #scoreboard {
   display: flex;
   justify-content: center;
