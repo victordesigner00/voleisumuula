@@ -2,55 +2,104 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <title>Placar de Beach Tennis Modularizado</title>
-</head>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Placar de Vôlei com Configuração Inicial</title>
   <link rel="stylesheet" href="style.css" />
+</head>
 <body>
-  <!-- Inputs para times, jogadores e fase -->
-  <input id="teamAName" placeholder="Nome Dupla A" />
-  <input id="teamAPlayer1" placeholder="Jogador 1 Dupla A" />
-  <input id="teamAPlayer2" placeholder="Jogador 2 Dupla A" />
-  <input id="teamBName" placeholder="Nome Dupla B" />
-  <input id="teamBPlayer1" placeholder="Jogador 1 Dupla B" />
-  <input id="teamBPlayer2" placeholder="Jogador 2 Dupla B" />
-  <select id="tournamentPhase">
-    <option value="">Selecione a fase</option>
-    <option value="Oitavas">Oitavas</option>
-    <option value="Quartas">Quartas</option>
-    <option value="Semifinal">Semifinal</option>
-    <option value="Final">Final</option>
-  </select>
-  <fieldset>
-    <legend>Dupla do sacador inicial</legend>
-    <label><input type="radio" name="initialServer" value="A" /> Dupla A</label>
-    <label><input type="radio" name="initialServer" value="B" /> Dupla B</label>
-  </fieldset>
-  <fieldset>
-    <legend>Jogador do sacador inicial</legend>
-    <label><input type="radio" name="initialServerPlayer" value="0" /> Jogador 1</label>
-    <label><input type="radio" name="initialServerPlayer" value="1" /> Jogador 2</label>
-  </fieldset>
-  <button id="startGameButton">Iniciar Jogo</button>
+  <h1>Configuração do Jogo de Vôlei</h1>
 
-  <!-- Área para mostrar jogadores e placar -->
-  <div id="playersContainer"></div>
+  <div id="setupContainer">
+    <div>
+      <label for="teamAName">Nome da Dupla 1:</label><br />
+      <input type="text" id="teamAName" placeholder="Nome da Dupla 1" autocomplete="off"/>
+    </div>
+    <div>
+      <label for="teamAPlayers">Jogadores da Dupla 1 (separe por vírgula):</label><br />
+      <input type="text" id="teamAPlayers" placeholder="Ex: Ana,Bia" autocomplete="off"/>
+    </div>
+    <div>
+      <label for="teamBName">Nome da Dupla 2:</label><br />
+      <input type="text" id="teamBName" placeholder="Nome da Dupla 2" autocomplete="off"/>
+    </div>
+    <div>
+      <label for="teamBPlayers">Jogadores da Dupla 2 (separe por vírgula):</label><br />
+      <input type="text" id="teamBPlayers" placeholder="Ex: Clara,Duda" autocomplete="off"/>
+    </div>
+    <div>
+      <label for="tournamentPhaseSelect">Fase do Torneio:</label><br />
+      <select id="tournamentPhaseSelect">
+        <option value="" disabled selected>Selecione a fase</option>
+        <option value="Fase de Grupos">Fase de Grupos</option>
+        <option value="Quartas de Final">Quartas de Final</option>
+        <option value="Semifinal">Semifinal</option>
+        <option value="Final">Final</option>
+      </select>
+    </div>
+    <div>
+      <label for="initialServerTeam">Escolha o sacador inicial:</label><br />
+      <select id="initialServerTeam">
+        <option value="" disabled selected>Escolha a dupla</option>
+        <option value="A">Dupla 1</option>
+        <option value="B">Dupla 2</option>
+      </select>
+    </div>
+    <div>
+      <label for="initialServerIndex">Índice do sacador na dupla (0 para primeiro jogador, 1 para segundo):</label><br />
+      <select id="initialServerIndex">
+        <option value="" disabled selected>Escolha o índice</option>
+        <option value="0">0</option>
+        <option value="1">1</option>
+      </select>
+    </div>
+    <button id="startGameBtn" class="btn">Iniciar Jogo</button>
 
-  <button id="teamAAddPoint">Adicionar ponto Dupla A</button>
-  <button id="teamBAddPoint">Adicionar ponto Dupla B</button>
-  <button id="undoButton">Desfazer ponto</button>
-  <button id="finishSetButton">Finalizar Set</button>
-  <button id="finishGameButton">Finalizar Jogo</button>
+    <hr />
+    <h3>Jogos Finalizados</h3>
+    <div id="finishedGamesSetupList"><i>Nenhum jogo finalizado salvo.</i></div>
+  </div>
 
-  <pre id="summary"></pre>
+  <div id="gameContainer" class="hidden">
+    <h2>Jogo: <span id="displayTeams"></span></h2>
+    <div>
+      <label for="tournamentPhase">Fase do Torneio:</label>
+      <select id="tournamentPhase" onchange="changePhase()">
+        <option value="Fase de Grupos">Fase de Grupos</option>
+        <option value="Quartas de Final">Quartas de Final</option>
+        <option value="Semifinal">Semifinal</option>
+        <option value="Final">Final</option>
+      </select>
+    </div>
 
-  <h3>Jogos finalizados:</h3>
-  <div id="finishedGamesList"></div>
+    <div id="playersContainer" class="players-container"></div>
 
-  <select id="finishedGamesSetupList"></select>
+    <div>
+      <h3>Set <span id="set-info">1</span></h3>
+      <div id="scoreboard">
+        <div id="teamA-score">0</div>
+        <div class="vs">x</div>
+        <div id="teamB-score">0</div>
+      </div>
+      <div>
+        <button class="btn" id="pointTeamA">Ponto para <span id="btnTeamAName"></span></button>
+        <button class="btn" id="pointTeamB">Ponto para <span id="btnTeamBName"></span></button>
+      </div>
+      <div>
+        <button class="btn" id="undoBtn">Desfazer Última Ação</button>
+        <button class="btn" id="finishSetBtn">Finalizar Set</button>
+        <button class="btn" id="finishGameBtn">Finalizar Jogo</button>
+      </div>
+    </div>
 
-  <script type="module">
-    import { eventHandlers } from './eventHandlers.js';
-    eventHandlers.initAll();
-  </script>
+    <pre id="summary"></pre>
+
+    <hr />
+    <h3>Jogos Finalizados</h3>
+    <div id="finishedGamesList"><i>Nenhum jogo finalizado salvo.</i></div>
+  </div>
+
+  <script src="gameState.js"></script>
+  <script src="renderUI.js"></script>
+  <script src="eventHandlers.js"></script>
 </body>
 </html>
