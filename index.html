@@ -56,17 +56,50 @@
   <div id="summary" style="margin-top: 30px;"></div>
 
   <script>
-    // Jogadores fixos (vão ser configuráveis depois)
+    // Jogadores fixos (configurável depois)
     const teamA = ["Ana", "Bia"];
     const teamB = ["Clara", "Duda"];
 
+    // Estado do jogo - padrão
     let scoreA = 0;
     let scoreB = 0;
     let currentSet = 1;
     let sets = [];
-
-    let server = { team: 'A', index: 0 }; // quem está sacando
+    let server = { team: 'A', index: 0 };
     let lastScoringTeam = null;
+
+    // Função para salvar estado no localStorage
+    function saveState() {
+      const state = {
+        scoreA,
+        scoreB,
+        currentSet,
+        sets,
+        server,
+        lastScoringTeam
+      };
+      localStorage.setItem('voleiState', JSON.stringify(state));
+    }
+
+    // Função para carregar estado do localStorage
+    function loadState() {
+      const saved = localStorage.getItem('voleiState');
+      if (saved) {
+        try {
+          const state = JSON.parse(saved);
+          scoreA = state.scoreA ?? 0;
+          scoreB = state.scoreB ?? 0;
+          currentSet = state.currentSet ?? 1;
+          sets = state.sets ?? [];
+          server = state.server ?? { team: 'A', index: 0 };
+          lastScoringTeam = state.lastScoringTeam ?? null;
+          document.getElementById("set-info").textContent = `Set ${currentSet}`;
+        } catch {
+          // se erro no parse, limpa localStorage
+          localStorage.removeItem('voleiState');
+        }
+      }
+    }
 
     function renderPlayers() {
       const aHTML = teamA.map((name, i) =>
@@ -94,18 +127,19 @@
       if (team === 'A') scoreA++;
       else scoreB++;
 
-      // Verifica se o time que pontuou era o que estava sacando
+      // Atualiza o saque:
       if (team === server.team) {
-        // Mantém o sacador (sem mudança)
+        // Mesmo time pontuando no próprio saque: servidor não muda
       } else {
-        // Side-out: troca time e alterna sacador
+        // Side-out: time que ganhou o ponto passa a sacar, servidor reinicia no índice 0
         server.team = team;
-        server.index = (server.index + 1) % 2;
+        server.index = 0;
       }
 
       lastScoringTeam = team;
       updateScores();
       renderPlayers();
+      saveState();
     }
 
     function finishSet() {
@@ -118,18 +152,20 @@
       document.getElementById("summary").innerHTML =
         `<h3>Súmula</h3>${resumo}`;
 
-      // Prepara novo set
       currentSet++;
       scoreA = 0;
       scoreB = 0;
+      // Servidor do próximo set começa no mesmo time que sacou o último, índice 0
       server.index = 0;
-      // Mantém o time que sacou por último como inicial do próximo set
+
+      document.getElementById("set-info").textContent = `Set ${currentSet}`;
       updateScores();
       renderPlayers();
-      document.getElementById("set-info").textContent = `Set ${currentSet}`;
+      saveState();
     }
 
-    // Inicialização
+    // Inicializa o jogo, carregando estado salvo se existir
+    loadState();
     updateScores();
     renderPlayers();
   </script>
