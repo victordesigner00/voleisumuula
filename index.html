@@ -2,25 +2,18 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Vôlei de Dupla - Avançado</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Vôlei de Dupla</title>
   <style>
     body {
       font-family: sans-serif;
       background: #f2f2f2;
       padding: 20px;
-      max-width: 600px;
-      margin: auto;
       text-align: center;
     }
-    h1 {
-      margin-bottom: 10px;
-    }
+    h1 { margin-bottom: 10px; }
     .team {
       margin: 20px 0;
-      background: white;
-      padding: 15px;
-      border-radius: 8px;
     }
     .score {
       font-size: 2rem;
@@ -30,325 +23,151 @@
       color: green;
       font-weight: bold;
     }
-    button, select, input[type="text"] {
-      font-size: 1.1rem;
+    button {
+      font-size: 1.2rem;
       margin: 5px;
-      padding: 8px 12px;
-      border-radius: 4px;
-      border: 1px solid #ccc;
-    }
-    input[type="text"] {
-      width: 120px;
-    }
-    #summary {
-      margin-top: 30px;
-      text-align: left;
-      background: white;
-      padding: 15px;
-      border-radius: 8px;
-    }
-    #controls {
-      margin-top: 20px;
-    }
-    label {
-      font-weight: bold;
-      margin-right: 10px;
-    }
-    #fileInput {
-      display: none;
+      padding: 10px 20px;
     }
   </style>
 </head>
 <body>
-
   <h1>Placar - Vôlei de Dupla</h1>
 
   <div id="set-info">Set 1</div>
 
-  <div>
-    <label for="phase-select">Fase do torneio:</label>
-    <select id="phase-select">
-      <option value="Fase de Grupos">Fase de Grupos</option>
-      <option value="Quartas de Final">Quartas de Final</option>
-      <option value="Semifinal">Semifinal</option>
-      <option value="Final">Final</option>
-    </select>
-  </div>
-
-  <div class="team" id="teamA-section">
+  <div class="team">
     <h2>Time A</h2>
-    <div>
-      <input type="text" id="teamA-player0" maxlength="20" />
-      <input type="text" id="teamA-player1" maxlength="20" />
-    </div>
+    <div id="teamA-players"></div>
     <div class="score" id="scoreA">0</div>
     <button onclick="addPoint('A')">+ Ponto Time A</button>
   </div>
 
-  <div class="team" id="teamB-section">
+  <div class="team">
     <h2>Time B</h2>
-    <div>
-      <input type="text" id="teamB-player0" maxlength="20" />
-      <input type="text" id="teamB-player1" maxlength="20" />
-    </div>
+    <div id="teamB-players"></div>
     <div class="score" id="scoreB">0</div>
     <button onclick="addPoint('B')">+ Ponto Time B</button>
   </div>
 
-  <div id="controls">
-    <button onclick="undo()">Desfazer Último Ponto</button>
+  <div style="margin-top: 20px;">
     <button onclick="finishSet()">Finalizar Set</button>
-    <button onclick="exportGame()">Exportar Jogo (JSON)</button>
-    <button onclick="document.getElementById('fileInput').click()">Importar Jogo (JSON)</button>
-    <input type="file" id="fileInput" accept="application/json" onchange="importGame(event)" />
   </div>
 
-  <div id="summary"></div>
+  <div id="summary" style="margin-top: 30px;"></div>
 
   <script>
-    // Estado inicial fixo
-    let state = {
-      teamA: ["Ana", "Bia"],
-      teamB: ["Clara", "Duda"],
-      scoreA: 0,
-      scoreB: 0,
-      currentSet: 1,
-      sets: [],
-      server: { team: 'A', index: 0 },
-      lastScoringTeam: null,
-      phase: "Fase de Grupos",
-      history: [] // Para desfazer pontos
-    };
+    // Jogadores fixos (configurável depois)
+    const teamA = ["Ana", "Bia"];
+    const teamB = ["Clara", "Duda"];
 
-    // Salva estado no localStorage
+    // Estado do jogo - padrão
+    let scoreA = 0;
+    let scoreB = 0;
+    let currentSet = 1;
+    let sets = [];
+    let server = { team: 'A', index: 0 };
+    let lastScoringTeam = null;
+
+    // Função para salvar estado no localStorage
     function saveState() {
+      const state = {
+        scoreA,
+        scoreB,
+        currentSet,
+        sets,
+        server,
+        lastScoringTeam
+      };
       localStorage.setItem('voleiState', JSON.stringify(state));
     }
 
-    // Carrega estado do localStorage
+    // Função para carregar estado do localStorage
     function loadState() {
       const saved = localStorage.getItem('voleiState');
       if (saved) {
         try {
-          const loaded = JSON.parse(saved);
-          // Validação simples para evitar crashes
-          if (
-            loaded.teamA && loaded.teamB && 
-            typeof loaded.scoreA === "number" &&
-            typeof loaded.scoreB === "number" &&
-            loaded.server && loaded.currentSet &&
-            loaded.phase
-          ) {
-            state = loaded;
-          }
+          const state = JSON.parse(saved);
+          scoreA = state.scoreA ?? 0;
+          scoreB = state.scoreB ?? 0;
+          currentSet = state.currentSet ?? 1;
+          sets = state.sets ?? [];
+          server = state.server ?? { team: 'A', index: 0 };
+          lastScoringTeam = state.lastScoringTeam ?? null;
+          document.getElementById("set-info").textContent = `Set ${currentSet}`;
         } catch {
+          // se erro no parse, limpa localStorage
           localStorage.removeItem('voleiState');
         }
       }
     }
 
-    // Atualiza os inputs dos nomes dos jogadores da UI
-    function renderPlayerInputs() {
-      document.getElementById("teamA-player0").value = state.teamA[0];
-      document.getElementById("teamA-player1").value = state.teamA[1];
-      document.getElementById("teamB-player0").value = state.teamB[0];
-      document.getElementById("teamB-player1").value = state.teamB[1];
+    function renderPlayers() {
+      const aHTML = teamA.map((name, i) =>
+        server.team === 'A' && server.index === i
+          ? `<div class="serving">➡️ ${name}</div>`
+          : `<div>${name}</div>`
+      ).join("");
+
+      const bHTML = teamB.map((name, i) =>
+        server.team === 'B' && server.index === i
+          ? `<div class="serving">➡️ ${name}</div>`
+          : `<div>${name}</div>`
+      ).join("");
+
+      document.getElementById("teamA-players").innerHTML = aHTML;
+      document.getElementById("teamB-players").innerHTML = bHTML;
     }
 
-    // Atualiza a UI de players e marca quem está sacando
-    function renderPlayersServing() {
-      function getServingHTML(team, teamName) {
-        return team.map((name, i) => {
-          if (state.server.team === teamName && state.server.index === i) {
-            return `<div class="serving">➡️ ${name}</div>`;
-          }
-          return `<div>${name}</div>`;
-        }).join("");
+    function updateScores() {
+      document.getElementById("scoreA").textContent = scoreA;
+      document.getElementById("scoreB").textContent = scoreB;
+    }
+
+    function addPoint(team) {
+      if (team === 'A') scoreA++;
+      else scoreB++;
+
+      // Atualiza o saque:
+      if (team === server.team) {
+        // Mesmo time pontuando no próprio saque: servidor não muda
+      } else {
+        // Side-out: time que ganhou o ponto passa a sacar, servidor reinicia no índice 0
+        server.team = team;
+        server.index = 0;
       }
-      document.getElementById("teamA-section").querySelector('div').innerHTML = getServingHTML(state.teamA, 'A');
-      document.getElementById("teamB-section").querySelector('div').innerHTML = getServingHTML(state.teamB, 'B');
+
+      lastScoringTeam = team;
+      updateScores();
+      renderPlayers();
+      saveState();
     }
 
-    // Atualiza os scores e set atual na UI
-    function updateUI() {
-      document.getElementById("scoreA").textContent = state.scoreA;
-      document.getElementById("scoreB").textContent = state.scoreB;
-      document.getElementById("set-info").textContent = `Set ${state.currentSet}`;
-      document.getElementById("phase-select").value = state.phase;
-    }
+    function finishSet() {
+      sets.push({ set: currentSet, A: scoreA, B: scoreB });
 
-    // Renderiza súmula dos sets
-    function renderSummary() {
-      if (state.sets.length === 0) {
-        document.getElementById("summary").innerHTML = "";
-        return;
-      }
-      const resumo = state.sets.map(s =>
+      const resumo = sets.map(s =>
         `Set ${s.set}: ${s.A} x ${s.B}`
       ).join("<br>");
-      document.getElementById("summary").innerHTML = `<h3>Súmula</h3>${resumo}`;
-    }
 
-    // Função para salvar estado atual no histórico para desfazer
-    function saveHistory() {
-      // Copia profunda simplificada para arrays e objetos básicos
-      const snapshot = JSON.parse(JSON.stringify(state));
-      // Limita histórico para evitar estourar memória
-      if (state.history.length >= 50) {
-        state.history.shift();
-      }
-      state.history.push(snapshot);
-    }
+      document.getElementById("summary").innerHTML =
+        `<h3>Súmula</h3>${resumo}`;
 
-    // Atualiza o servidor conforme regra explicada:
-    // - Se time que pontuou é o mesmo do servidor, o índice do servidor alterna entre 0 e 1
-    // - Se time que pontuou é o adversário, o saque passa para time adversário, jogador índice 0
-    function updateServer(scoringTeam) {
-      if (scoringTeam === state.server.team) {
-        // mesmo time pontuando: alterna servidor
-        state.server.index = 1 - state.server.index; // alterna entre 0 e 1
-      } else {
-        // time adversário pontuou: saque para time adversário, jogador 0
-        state.server.team = scoringTeam;
-        state.server.index = 0;
-      }
-    }
+      currentSet++;
+      scoreA = 0;
+      scoreB = 0;
+      // Servidor do próximo set começa no mesmo time que sacou o último, índice 0
+      server.index = 0;
 
-    // Atualiza nomes de jogadores ao mudar input
-    function updatePlayerNamesFromInputs() {
-      state.teamA[0] = document.getElementById("teamA-player0").value.trim() || "Jogador A0";
-      state.teamA[1] = document.getElementById("teamA-player1").value.trim() || "Jogador A1";
-      state.teamB[0] = document.getElementById("teamB-player0").value.trim() || "Jogador B0";
-      state.teamB[1] = document.getElementById("teamB-player1").value.trim() || "Jogador B1";
-    }
-
-    // Quando muda a fase do torneio
-    document.getElementById("phase-select").addEventListener("change", e => {
-      state.phase = e.target.value;
-      saveState();
-    });
-
-    // Adiciona ponto para um time
-    function addPoint(team) {
-      updatePlayerNamesFromInputs();
-
-      saveHistory(); // salva estado antes da mudança
-
-      if (team === 'A') state.scoreA++;
-      else state.scoreB++;
-
-      updateServer(team);
-
-      state.lastScoringTeam = team;
-
-      updateUI();
-      renderPlayersServing();
-      renderSummary();
+      document.getElementById("set-info").textContent = `Set ${currentSet}`;
+      updateScores();
+      renderPlayers();
       saveState();
     }
 
-    // Finaliza o set
-    function finishSet() {
-      saveHistory();
-
-      state.sets.push({
-        set: state.currentSet,
-        A: state.scoreA,
-        B: state.scoreB
-      });
-
-      state.currentSet++;
-      state.scoreA = 0;
-      state.scoreB = 0;
-
-      // Servidor começa no mesmo time que sacou o último set, jogador 0
-      state.server.index = 0;
-
-      updateUI();
-      renderPlayersServing();
-      renderSummary();
-      saveState();
-    }
-
-    // Desfaz o último ponto/ação
-    function undo() {
-      if (state.history.length === 0) {
-        alert("Nada para desfazer");
-        return;
-      }
-      const lastState = state.history.pop();
-      state = lastState;
-
-      updateUI();
-      renderPlayersServing();
-      renderSummary();
-      saveState();
-      renderPlayerInputs();
-    }
-
-    // Exporta o jogo atual como JSON para download
-    function exportGame() {
-      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state));
-      const dlAnchor = document.createElement('a');
-      dlAnchor.setAttribute("href", dataStr);
-      dlAnchor.setAttribute("download", `volei_dupla_${new Date().toISOString()}.json`);
-      document.body.appendChild(dlAnchor);
-      dlAnchor.click();
-      dlAnchor.remove();
-    }
-
-    // Importa jogo salvo (JSON)
-    function importGame(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-
-      const reader = new FileReader();
-      reader.onload = e => {
-        try {
-          const importedState = JSON.parse(e.target.result);
-          if (
-            importedState.teamA && importedState.teamB &&
-            typeof importedState.scoreA === "number" &&
-            typeof importedState.scoreB === "number" &&
-            importedState.server && importedState.currentSet &&
-            importedState.phase
-          ) {
-            state = importedState;
-            saveState();
-            updateUI();
-            renderPlayersServing();
-            renderSummary();
-            renderPlayerInputs();
-            state.history = []; // limpa histórico para evitar conflito
-            alert("Jogo importado com sucesso!");
-          } else {
-            alert("Arquivo JSON inválido para o jogo.");
-          }
-        } catch {
-          alert("Erro ao ler o arquivo JSON.");
-        }
-      };
-      reader.readAsText(file);
-      // Limpa input para poder importar o mesmo arquivo depois se quiser
-      event.target.value = "";
-    }
-
-    // Inicialização
+    // Inicializa o jogo, carregando estado salvo se existir
     loadState();
-    renderPlayerInputs();
-    updateUI();
-    renderPlayersServing();
-    renderSummary();
-
-    // Atualiza nomes dos jogadores se usuário editar diretamente os inputs
-    ["teamA-player0", "teamA-player1", "teamB-player0", "teamB-player1"].forEach(id => {
-      document.getElementById(id).addEventListener("input", () => {
-        updatePlayerNamesFromInputs();
-        saveState();
-        renderPlayersServing();
-      });
-    });
+    updateScores();
+    renderPlayers();
   </script>
-
 </body>
 </html>
