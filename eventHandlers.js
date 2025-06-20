@@ -1,108 +1,99 @@
-// eventHandlers.js
+// Inicia o jogo a partir dos inputs do setup
+function startGame() {
+  const aName = document.getElementById("teamAName").value.trim();
+  const aPlayers = document.getElementById("teamAPlayers").value.split(",").map(s => s.trim()).filter(Boolean);
+  const bName = document.getElementById("teamBName").value.trim();
+  const bPlayers = document.getElementById("teamBPlayers").value.split(",").map(s => s.trim()).filter(Boolean);
+  const phase = document.getElementById("tournamentPhaseSelect").value;
+  const initialServerTeam = document.getElementById("initialServerTeam").value;
+  const initialServerIndex = parseInt(document.getElementById("initialServerIndex").value);
 
-import { gameState } from './gameState.js';
-import { renderUI } from './renderUI.js';
+  if (!validateSetup(aName, aPlayers, bName, bPlayers, phase, initialServerTeam, initialServerIndex)) return;
 
-export const eventHandlers = (() => {
+  // Inicializa estado
+  teamAName = aName;
+  teamBName = bName;
+  teamA = aPlayers;
+  teamB = bPlayers;
+  tournamentPhase = phase;
+  server = {team: initialServerTeam, index: initialServerIndex};
+  currentSet = 1;
+  sets = [];
+  scoreA = 0;
+  scoreB = 0;
+  historyStack = [];
+  lastScoringTeam = null;
+  lastServerIndexA = initialServerTeam === "A" ? initialServerIndex : 0;
+  lastServerIndexB = initialServerTeam === "B" ? initialServerIndex : 0;
 
-  function setupStartGameButton() {
-    document.getElementById("startGameButton").addEventListener("click", () => {
-      const teamAName = document.getElementById("teamAName").value.trim();
-      const teamBName = document.getElementById("teamBName").value.trim();
-      const teamAPlayers = [
-        document.getElementById("teamAPlayer1").value.trim(),
-        document.getElementById("teamAPlayer2").value.trim()
-      ];
-      const teamBPlayers = [
-        document.getElementById("teamBPlayer1").value.trim(),
-        document.getElementById("teamBPlayer2").value.trim()
-      ];
-      const phase = document.getElementById("tournamentPhase").value;
-      const initialServerTeam = document.querySelector('input[name="initialServer"]:checked')?.value;
-      const initialServerIndex = parseInt(document.querySelector('input[name="initialServerPlayer"]:checked')?.value);
+  // Ajusta interface
+  document.getElementById("setupContainer").classList.add("hidden");
+  document.getElementById("gameContainer").classList.remove("hidden");
+  document.getElementById("displayTeams").textContent = `${teamAName} x ${teamBName}`;
+  document.getElementById("tournamentPhase").value = tournamentPhase;
 
-      const validation = gameState.validateSetup(teamAName, teamAPlayers, teamBName, teamBPlayers, phase, initialServerTeam, initialServerIndex);
+  updateButtonNames();
+  renderPlayers();
+  updateScoreboard();
+  updateSummary();
+  renderFinishedGames();
+}
 
-      if (!validation.valid) {
-        alert(validation.message);
-        return;
-      }
+// Pontuar para o time A ou B
+function pointForTeamA() {
+  addPoint("A");
+  renderPlayers();
+  updateScoreboard();
+  updateSummary();
+}
+function pointForTeamB() {
+  addPoint("B");
+  renderPlayers();
+  updateScoreboard();
+  updateSummary();
+}
 
-      gameState.initGame({
-        teamAName,
-        teamBName,
-        teamAPlayers,
-        teamBPlayers,
-        phase,
-        initialServerTeam,
-        initialServerIndex
-      });
-
-      renderUI.renderPlayers();
-      renderUI.renderSummary();
-    });
+// Desfaz última ação
+function undo() {
+  if (undoLastAction()) {
+    renderPlayers();
+    updateScoreboard();
+    updateSummary();
+  } else {
+    alert("Nada para desfazer.");
   }
+}
 
-  function setupPointButtons() {
-    document.getElementById("teamAAddPoint").addEventListener("click", () => {
-      gameState.addPoint("A");
-      renderUI.renderSummary();
-      renderUI.renderPlayers();
-    });
-
-    document.getElementById("teamBAddPoint").addEventListener("click", () => {
-      gameState.addPoint("B");
-      renderUI.renderSummary();
-      renderUI.renderPlayers();
-    });
+// Finaliza set
+function finishSetHandler() {
+  if (finishSet()) {
+    renderPlayers();
+    updateScoreboard();
+    updateSummary();
+    alert(`Set ${currentSet - 1} finalizado.`);
   }
+}
 
-  function setupUndoButton() {
-    document.getElementById("undoButton").addEventListener("click", () => {
-      if (!gameState.undo()) {
-        alert("Nada a desfazer.");
-        return;
-      }
-      renderUI.renderSummary();
-      renderUI.renderPlayers();
-    });
+// Finaliza jogo
+function finishGameHandler() {
+  if (finishGame()) {
+    alert("Jogo finalizado!");
+    document.getElementById("setupContainer").classList.remove("hidden");
+    document.getElementById("gameContainer").classList.add("hidden");
+    renderFinishedGames();
   }
+}
 
-  function setupFinishSetButton() {
-    document.getElementById("finishSetButton").addEventListener("click", () => {
-      const result = gameState.finishSet();
-      if (!result.success) {
-        alert(result.message);
-        return;
-      }
-      renderUI.renderSummary();
-      renderUI.renderPlayers();
-    });
-  }
+// Alterar fase do torneio durante o jogo
+function changePhase() {
+  const phase = document.getElementById("tournamentPhase").value;
+  changeTournamentPhase(phase);
+}
 
-  function setupFinishGameButton() {
-    document.getElementById("finishGameButton").addEventListener("click", () => {
-      const result = gameState.finishGame();
-      if (!result.success) {
-        alert(result.message);
-        return;
-      }
-      alert("Jogo finalizado! Vencedor: " + result.finishedGame.winner);
-      renderUI.updateFinishedGamesList();
-      renderUI.updateFinishedGamesSetupList();
-      // Reinicializar ou limpar a tela, se quiser
-    });
-  }
-
-  function initAll() {
-    setupStartGameButton();
-    setupPointButtons();
-    setupUndoButton();
-    setupFinishSetButton();
-    setupFinishGameButton();
-  }
-
-  return {
-    initAll,
-  };
-})();
+// Configura listeners
+document.getElementById("startGameBtn").addEventListener("click", startGame);
+document.getElementById("pointTeamA").addEventListener("click", pointForTeamA);
+document.getElementById("pointTeamB").addEventListener("click", pointForTeamB);
+document.getElementById("undoBtn").addEventListener("click", undo);
+document.getElementById("finishSetBtn").addEventListener("click", finishSetHandler);
+document.getElementById("finishGameBtn").addEventListener("click", finishGameHandler);
