@@ -28,10 +28,37 @@
       margin: 5px;
       padding: 10px 20px;
     }
+    select {
+      font-size: 1rem;
+      margin-left: 10px;
+    }
+    #server-selection {
+      margin-bottom: 20px;
+    }
   </style>
 </head>
 <body>
   <h1>Placar - Vôlei de Dupla</h1>
+
+  <div id="server-selection">
+    <div>
+      <label>Servidor inicial Time A: 
+        <select id="startServerA">
+          <option value="0">Jogador 0 (Ana)</option>
+          <option value="1">Jogador 1 (Bia)</option>
+        </select>
+      </label>
+    </div>
+    <div>
+      <label>Servidor inicial Time B: 
+        <select id="startServerB">
+          <option value="0">Jogador 0 (Clara)</option>
+          <option value="1">Jogador 1 (Duda)</option>
+        </select>
+      </label>
+    </div>
+    <button onclick="startSet()">Iniciar / Reiniciar Set</button>
+  </div>
 
   <div id="set-info">Set 1</div>
 
@@ -56,11 +83,11 @@
   <div id="summary" style="margin-top: 30px;"></div>
 
   <script>
-    // Jogadores fixos (configurável depois)
+    // Jogadores fixos
     const teamA = ["Ana", "Bia"];
     const teamB = ["Clara", "Duda"];
 
-    // Estado do jogo - padrão
+    // Estado do jogo
     let scoreA = 0;
     let scoreB = 0;
     let currentSet = 1;
@@ -68,7 +95,13 @@
     let server = { team: 'A', index: 0 };
     let lastScoringTeam = null;
 
-    // Função para salvar estado no localStorage
+    // Guardam quem começou sacando no set, configurável
+    let startingServer = { A: 0, B: 0 };
+
+    // Controla último servidor usado para cada time, para alternar na troca de saque
+    let lastServerIndex = { A: 0, B: 0 };
+
+    // Salva estado no localStorage
     function saveState() {
       const state = {
         scoreA,
@@ -76,12 +109,14 @@
         currentSet,
         sets,
         server,
-        lastScoringTeam
+        lastScoringTeam,
+        startingServer,
+        lastServerIndex
       };
       localStorage.setItem('voleiState', JSON.stringify(state));
     }
 
-    // Função para carregar estado do localStorage
+    // Carrega estado do localStorage
     function loadState() {
       const saved = localStorage.getItem('voleiState');
       if (saved) {
@@ -93,9 +128,15 @@
           sets = state.sets ?? [];
           server = state.server ?? { team: 'A', index: 0 };
           lastScoringTeam = state.lastScoringTeam ?? null;
+          startingServer = state.startingServer ?? { A: 0, B: 0 };
+          lastServerIndex = state.lastServerIndex ?? { A: 0, B: 0 };
+
+          // Atualiza selects com servidores iniciais carregados
+          document.getElementById('startServerA').value = startingServer.A;
+          document.getElementById('startServerB').value = startingServer.B;
+
           document.getElementById("set-info").textContent = `Set ${currentSet}`;
         } catch {
-          // se erro no parse, limpa localStorage
           localStorage.removeItem('voleiState');
         }
       }
@@ -127,13 +168,17 @@
       if (team === 'A') scoreA++;
       else scoreB++;
 
-      // Atualiza o saque:
       if (team === server.team) {
-        // Mesmo time pontuando no próprio saque: servidor não muda
+        // Mesmo time pontuando: saque continua com o mesmo jogador
       } else {
-        // Side-out: time que ganhou o ponto passa a sacar, servidor reinicia no índice 0
+        // Side-out: troca de time sacando
         server.team = team;
-        server.index = 0;
+
+        // Alterna servidor entre 0 e 1 para o time que voltou a sacar
+        const lastIndex = lastServerIndex[team];
+        const newIndex = lastIndex === 0 ? 1 : 0;
+        server.index = newIndex;
+        lastServerIndex[team] = newIndex;
       }
 
       lastScoringTeam = team;
@@ -153,10 +198,20 @@
         `<h3>Súmula</h3>${resumo}`;
 
       currentSet++;
+
+      // Reinicia placar
       scoreA = 0;
       scoreB = 0;
-      // Servidor do próximo set começa no mesmo time que sacou o último, índice 0
-      server.index = 0;
+
+      // Reinicia servidor conforme startingServer
+      server.team = 'A'; // quem começa sacando sempre Time A no set?
+      server.index = startingServer.A;
+
+      // Reinicia lastServerIndex para começar alternância correta
+      lastServerIndex = {
+        A: startingServer.A,
+        B: startingServer.B
+      };
 
       document.getElementById("set-info").textContent = `Set ${currentSet}`;
       updateScores();
@@ -164,7 +219,39 @@
       saveState();
     }
 
-    // Inicializa o jogo, carregando estado salvo se existir
+    function startSet() {
+      // Atualiza servidores iniciais pelos selects
+      startingServer.A = parseInt(document.getElementById('startServerA').value, 10);
+      startingServer.B = parseInt(document.getElementById('startServerB').value, 10);
+
+      // Reinicia placar e set
+      scoreA = 0;
+      scoreB = 0;
+
+      // Sempre time A começa sacando no set, com jogador configurado
+      server.team = 'A';
+      server.index = startingServer.A;
+
+      // Reinicia lastServerIndex para alternância correta
+      lastServerIndex = {
+        A: startingServer.A,
+        B: startingServer.B
+      };
+
+      // Se for início do jogo (currentSet ainda 1), mantém, senão reinicia pra 1
+      if (currentSet !== 1) currentSet = 1;
+
+      document.getElementById("set-info").textContent = `Set ${currentSet}`;
+      updateScores();
+      renderPlayers();
+      saveState();
+
+      // Limpa súmula
+      sets = [];
+      document.getElementById("summary").innerHTML = "";
+    }
+
+    // Inicializa jogo
     loadState();
     updateScores();
     renderPlayers();
