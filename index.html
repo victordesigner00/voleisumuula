@@ -10,95 +10,70 @@
   <h1>Configuração do Jogo de Vôlei</h1>
 
   <div id="setupContainer">
-    <div>
-      <label for="teamAName">Nome da Dupla 1:</label><br />
-      <input type="text" id="teamAName" placeholder="Nome da Dupla 1" autocomplete="off"/>
-    </div>
-    <div>
-      <label for="teamAPlayers">Jogadores da Dupla 1 (separe por vírgula):</label><br />
-      <input type="text" id="teamAPlayers" placeholder="Ex: Ana,Bia" autocomplete="off"/>
-    </div>
-    <div>
-      <label for="teamBName">Nome da Dupla 2:</label><br />
-      <input type="text" id="teamBName" placeholder="Nome da Dupla 2" autocomplete="off"/>
-    </div>
-    <div>
-      <label for="teamBPlayers">Jogadores da Dupla 2 (separe por vírgula):</label><br />
-      <input type="text" id="teamBPlayers" placeholder="Ex: Clara,Duda" autocomplete="off"/>
-    </div>
-    <div>
-      <label for="tournamentPhaseSelect">Fase do Torneio:</label><br />
+    <label>Nome da Dupla 1: <input id="teamAName" type="text" /></label><br />
+    <label>Jogadores da Dupla 1 (separados por vírgula): <input id="teamAPlayers" type="text" placeholder="Ex: João, Maria" /></label><br />
+    <label>Nome da Dupla 2: <input id="teamBName" type="text" /></label><br />
+    <label>Jogadores da Dupla 2 (separados por vírgula): <input id="teamBPlayers" type="text" placeholder="Ex: Pedro, Ana" /></label><br />
+
+    <label>Fase do Torneio:
       <select id="tournamentPhaseSelect">
-        <option value="" disabled selected>Selecione a fase</option>
-        <option value="Fase de Grupos">Fase de Grupos</option>
+        <option value="">Selecione</option>
+        <option value="Primeira Fase">Primeira Fase</option>
         <option value="Quartas de Final">Quartas de Final</option>
         <option value="Semifinal">Semifinal</option>
         <option value="Final">Final</option>
       </select>
-    </div>
-    <div>
-      <label for="initialServerTeam">Escolha o sacador inicial:</label><br />
+    </label><br />
+
+    <label>Dupla que faz o saque inicial:
       <select id="initialServerTeam">
-        <option value="" disabled selected>Escolha a dupla</option>
+        <option value="">Selecione</option>
         <option value="A">Dupla 1</option>
         <option value="B">Dupla 2</option>
       </select>
-    </div>
-    <div>
-      <label for="initialServerIndex">Índice do sacador na dupla (0 para primeiro jogador, 1 para segundo):</label><br />
-      <select id="initialServerIndex">
-        <option value="" disabled selected>Escolha o índice</option>
-        <option value="0">0</option>
-        <option value="1">1</option>
-      </select>
-    </div>
-    <button id="startGameBtn" class="btn">Iniciar Jogo</button>
+    </label><br />
 
-    <hr />
-    <h3>Jogos Finalizados</h3>
-    <div id="finishedGamesSetupList"><i>Nenhum jogo finalizado salvo.</i></div>
+    <label>Índice do sacador inicial:
+      <select id="initialServerIndex">
+        <option value="0">Jogador 1</option>
+        <option value="1">Jogador 2</option>
+      </select>
+    </label><br />
+
+    <button id="startGameBtn">Iniciar Jogo</button>
   </div>
 
   <div id="gameContainer" class="hidden">
-    <h2>Jogo: <span id="displayTeams"></span></h2>
-    <div>
-      <label for="tournamentPhase">Fase do Torneio:</label>
-      <select id="tournamentPhase" onchange="changePhase()">
-        <option value="Fase de Grupos">Fase de Grupos</option>
+    <h2 id="displayTeams"></h2>
+
+    <div id="playersContainer"></div>
+
+    <button id="pointTeamA">Ponto Dupla 1 (<span id="btnTeamAName"></span>)</button>
+    <button id="pointTeamB">Ponto Dupla 2 (<span id="btnTeamBName"></span>)</button>
+    <button id="undoBtn">Desfazer último ponto</button>
+    <button id="finishSetBtn">Finalizar Set</button>
+    <button id="finishGameBtn">Finalizar Jogo</button>
+
+    <br />
+    <label>Fase do torneio: 
+      <select id="tournamentPhase">
+        <option value="">Selecione</option>
+        <option value="Primeira Fase">Primeira Fase</option>
         <option value="Quartas de Final">Quartas de Final</option>
         <option value="Semifinal">Semifinal</option>
         <option value="Final">Final</option>
       </select>
-    </div>
-
-    <div id="playersContainer" class="players-container"></div>
-
-    <div>
-      <h3>Set <span id="set-info">1</span></h3>
-      <div id="scoreboard">
-        <div id="teamA-score">0</div>
-        <div class="vs">x</div>
-        <div id="teamB-score">0</div>
-      </div>
-      <div>
-        <button class="btn" id="pointTeamA">Ponto para <span id="btnTeamAName"></span></button>
-        <button class="btn" id="pointTeamB">Ponto para <span id="btnTeamBName"></span></button>
-      </div>
-      <div>
-        <button class="btn" id="undoBtn">Desfazer Última Ação</button>
-        <button class="btn" id="finishSetBtn">Finalizar Set</button>
-        <button class="btn" id="finishGameBtn">Finalizar Jogo</button>
-      </div>
-    </div>
+    </label>
 
     <pre id="summary"></pre>
-
-    <hr />
-    <h3>Jogos Finalizados</h3>
-    <div id="finishedGamesList"><i>Nenhum jogo finalizado salvo.</i></div>
   </div>
 
-  <!-- Carregue apenas eventHandlers.js como módulo -->
-  <script type="module" src="eventHandlers.js"></script>
+  <h3>Jogos Finalizados</h3>
+  <div id="finishedGamesList"></div>
+
+  <h3>Jogos Finalizados (Configuração)</h3>
+  <div id="finishedGamesSetupList"></div>
+
+  <script type="module" src="./eventHandlers.js"></script>
 </body>
 </html>
