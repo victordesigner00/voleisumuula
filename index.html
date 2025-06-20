@@ -456,17 +456,23 @@
 
 <script>
   // Inserir o painel de placar visual no DOM depois que a página carrega
-  window.onload = function() {
-    const setHeading = document.getElementById("set-info");
-    if (setHeading) {
-      const scoreboard = document.createElement("div");
-      scoreboard.id = "scoreboard";
-      scoreboard.innerHTML = `
-        <div id="teamA-score">0</div>
-        <div class="vs">x</div>
-        <div id="teamB-score">0</div>
-      `;
-      setHeading.parentNode.insertBefore(scoreboard, setHeading.nextSibling);
-    }
-  };
+window.onload = function() {
+  const setHeading = document.getElementById("set-info");
+  if (setHeading) {
+    const scoreboard = document.createElement("div");
+    scoreboard.id = "scoreboard";
+    scoreboard.innerHTML = `
+      <div style="display: flex; justify-content: space-between; font-weight: bold; margin-bottom: 5px; max-width: 250px;">
+        <div id="teamA-name">${teamAName || 'Dupla 1'}</div>
+        <div id="teamB-name" style="text-align: right;">${teamBName || 'Dupla 2'}</div>
+      </div>
+      <div style="display: flex; justify-content: space-between; align-items: center; max-width: 250px;">
+        <div id="teamA-score" style="font-size: 2.5rem; color: #0057e7; min-width: 80px; text-align: left;">0</div>
+        <div class="vs" style="font-size: 1.8rem;">x</div>
+        <div id="teamB-score" style="font-size: 2.5rem; color: #d62d20; min-width: 80px; text-align: right;">0</div>
+      </div>
+    `;
+    setHeading.parentNode.insertBefore(scoreboard, setHeading.nextSibling);
+  }
+};
 </script>
