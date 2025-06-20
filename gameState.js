@@ -1,22 +1,22 @@
-// Estado principal
-let teamAName = "";
-let teamBName = "";
-let teamA = [];
-let teamB = [];
-let scoreA = 0;
-let scoreB = 0;
-let currentSet = 1;
-let sets = [];
-let server = null; // {team: 'A'|'B', index: 0|1}
-let lastScoringTeam = null;
-let tournamentPhase = "";
-let lastServerIndexA = 0;
-let lastServerIndexB = 0;
-let historyStack = [];
-let finishedGames = [];
+// Variáveis de estado exportadas para serem acessíveis externamente (opcional, só se for usado fora)
+export let teamAName = "";
+export let teamBName = "";
+export let teamA = [];
+export let teamB = [];
+export let scoreA = 0;
+export let scoreB = 0;
+export let currentSet = 1;
+export let sets = [];
+export let server = null; // {team: 'A'|'B', index: 0|1}
+export let lastScoringTeam = null;
+export let tournamentPhase = "";
+export let lastServerIndexA = 0;
+export let lastServerIndexB = 0;
+export let historyStack = [];
+export let finishedGames = [];
 
-// Valida dados do setup antes de iniciar jogo
-function validateSetup(aName, aPlayersArr, bName, bPlayersArr, phase, initialServerTeam, initialServerIndex) {
+// Funções exportadas para uso externo
+export function validateSetup(aName, aPlayersArr, bName, bPlayersArr, phase, initialServerTeam, initialServerIndex) {
   if (!aName || !bName) {
     alert("Nome das duplas é obrigatório.");
     return false;
@@ -40,8 +40,7 @@ function validateSetup(aName, aPlayersArr, bName, bPlayersArr, phase, initialSer
   return true;
 }
 
-// Lógica para adicionar ponto
-function addPoint(team) {
+export function addPoint(team) {
   if (team !== "A" && team !== "B") return;
 
   historyStack.push({
@@ -69,8 +68,7 @@ function addPoint(team) {
   }
 }
 
-// Undo da última ação (ponto)
-function undoLastAction() {
+export function undoLastAction() {
   if (historyStack.length === 0) return false;
 
   const lastState = historyStack.pop();
@@ -84,8 +82,7 @@ function undoLastAction() {
   return true;
 }
 
-// Finaliza o set atual
-function finishSet() {
+export function finishSet() {
   if (!canFinishSet()) {
     alert("Pontuação insuficiente para finalizar o set.");
     return false;
@@ -100,16 +97,13 @@ function finishSet() {
   return true;
 }
 
-// Verifica se é possível finalizar o set
-function canFinishSet() {
-  // Regra: o time vencedor deve ter no mínimo 25 pontos e diferença de pelo menos 2 pontos
+export function canFinishSet() {
   const maxScore = Math.max(scoreA, scoreB);
   const diff = Math.abs(scoreA - scoreB);
   return maxScore >= 25 && diff >= 2;
 }
 
-// Calcula o vencedor do jogo com base nos sets
-function getGameWinner() {
+export function getGameWinner() {
   let winsA = 0;
   let winsB = 0;
   sets.forEach(set => {
@@ -121,8 +115,7 @@ function getGameWinner() {
   else return null;
 }
 
-// Finaliza o jogo, salva na lista de jogos finalizados
-function finishGame() {
+export function finishGame() {
   if (sets.length === 0) {
     alert("Finalize pelo menos um set antes de finalizar o jogo.");
     return false;
@@ -145,8 +138,7 @@ function finishGame() {
   return true;
 }
 
-// Reseta o estado para novo jogo
-function resetGame() {
+export function resetGame() {
   teamAName = "";
   teamBName = "";
   teamA = [];
@@ -163,7 +155,6 @@ function resetGame() {
   historyStack = [];
 }
 
-// Altera a fase do torneio
-function changeTournamentPhase(newPhase) {
+export function changeTournamentPhase(newPhase) {
   tournamentPhase = newPhase;
 }
